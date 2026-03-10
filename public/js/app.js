@@ -773,71 +773,128 @@ function renderDetailInsights(p) {
 function renderScribe() {
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">AI Scribe</div>
-      <div class="page-subtitle">Convert consultation recordings into structured SOAP notes</div>
+      <div class="page-title">📋 Medical Scribe — AI Documentation Assistant</div>
+      <div class="page-subtitle">Convert voice consultation into professional SOAP notes in seconds</div>
     </div>
-    <div class="scribe-layout">
-      <div class="scribe-panel">
+
+    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-bottom:16px;max-width:100%;overflow:hidden">
+      <!-- DOCTOR GUIDANCE PANEL (Professional Tips) -->
+      <div class="scribe-panel" style="background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(124,58,237,.05));border:1px solid rgba(0,212,255,.2)">
         <div class="scribe-panel-header">
-          <span style="font-size:16px">🎙️</span>
-          <span class="scribe-panel-title">Consultation Recording</span>
+          <span style="font-size:16px">💡</span>
+          <span class="scribe-panel-title" style="color:#00d4ff">Doctor Guidelines</span>
         </div>
-        <div class="scribe-panel-body">
-          <div class="record-section">
-            <div class="form-row" style="justify-content:center;gap:16px;margin-bottom:16px">
-              <div>
-                <div class="form-label">Patient</div>
-                <select class="form-select" id="scribe-patient" style="min-width:180px">
-                  <option value="">Select patient...</option>
-                  ${PatientStore.getAll().map(p => `<option value="${p.id}">${escHtml(p.name)} (${p.bed})</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <div class="form-label">Specialty</div>
-                <select class="form-select" id="scribe-specialty">
-                  <option>General Medicine</option>
-                  <option>Respiratory</option>
-                  <option>Cardiology</option>
-                  <option>Gastroenterology</option>
-                  <option>Neurology</option>
-                  <option>Acute Medicine</option>
-                </select>
-              </div>
+        <div class="scribe-panel-body" style="font-size:13px;color:#cbd5e0;line-height:1.6">
+          <div style="padding:0;display:flex;flex-direction:column;gap:12px">
+            <div style="padding:10px;background:rgba(0,212,255,.05);border-radius:8px;border-left:3px solid #00d4ff">
+              <strong style="color:#00d4ff">✓ Best Format for Clear Documentation:</strong><br>
+              Speak naturally but organized. Example:<br>
+              <span style="color:#94a3b8;font-style:italic">"Patient is 45-year-old male. Chief complaint is chest pain for 2 days. Started after exertion. Associated with shortness of breath. Vital signs: temp 37, HR 85, BP 130/80, O2 98%. Heart sounds normal. Lungs clear."</span>
             </div>
-            <div class="record-btn-wrap" style="margin-bottom:16px">
-              <button class="record-btn" id="record-btn">${ICONS.mic}</button>
-              <div class="record-ripple"></div>
-              <div class="record-ripple"></div>
+
+            <div style="padding:10px;background:rgba(124,58,237,.05);border-radius:8px;border-left:3px solid #7c3aed">
+              <strong style="color:#7c3aed">⭐ Say These Key Elements:</strong>
+              <ul style="margin:8px 0 0 0;padding-left:18px">
+                <li>Patient name/age and chief complaint</li>
+                <li>Vital signs (temperature, heart rate, BP, O2)</li>
+                <li>Exam findings (clear/abnormal)</li>
+                <li>What you think it is</li>
+                <li>What you'll do (tests, treatment)</li>
+              </ul>
             </div>
-            <div class="record-status" id="record-status">Tap to record</div>
-            <div class="record-timer" id="record-timer">0:00</div>
-          </div>
-          <div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Transcript</div>
-          <div class="transcript-area" id="transcript-area" contenteditable="true" style="outline:none" data-placeholder="Recording transcript will appear here, or type/paste a consultation transcript..."></div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="btn btn-primary" id="generate-note-btn" style="flex:1">Generate SOAP Note</button>
-            <button class="btn btn-ghost" id="clear-scribe-btn">Clear</button>
+
+            <div style="padding:10px;background:rgba(34,197,94,.05);border-radius:8px;border-left:3px solid #22c55e">
+              <strong style="color:#22c55e">✅ No Perfect Script Needed:</strong><br>
+              AXIOM handles incomplete data. Even short notes convert to professional documentation.
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- RECORDING & TRANSCRIPTION PANEL -->
       <div class="scribe-panel">
         <div class="scribe-panel-header">
-          <div class="ai-badge"><span class="ai-badge-dot"></span>AXIOM</div>
-          <span class="scribe-panel-title">SOAP Note Output</span>
-          <div style="margin-left:auto;display:flex;gap:6px">
-            <button class="btn-icon btn-sm" id="copy-note-btn" title="Copy">${ICONS.copy}</button>
-            <button class="btn-icon btn-sm" id="print-note-btn" title="Print">${ICONS.print}</button>
-          </div>
+          <span style="font-size:16px">🎙️</span>
+          <span class="scribe-panel-title">Voice Recording & Transcription</span>
         </div>
         <div class="scribe-panel-body">
-          <div id="safety-flags-container"></div>
-          <div id="note-output" class="note-output">
-            <div style="color:#4b5563;font-size:13px;text-align:center;padding:40px 0">Generated note will appear here</div>
+          <div class="form-row" style="justify-content:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+            <div>
+              <div class="form-label" style="font-size:11px">Patient</div>
+              <select class="form-select" id="scribe-patient" style="min-width:150px;font-size:13px">
+                <option value="">Select patient</option>
+                ${PatientStore.getAll().map(p => `<option value="${p.id}">${escHtml(p.name)} (Bed ${p.bed})</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <div class="form-label" style="font-size:11px">Department</div>
+              <select class="form-select" id="scribe-specialty" style="min-width:140px;font-size:13px">
+                <option>General Medicine</option>
+                <option>Cardiology</option>
+                <option>Respiratory</option>
+                <option>Gastroenterology</option>
+                <option>Neurology</option>
+                <option>Emergency</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- RECORD BUTTON WITH 3D EFFECT -->
+          <div class="record-btn-wrap" style="margin:24px 0">
+            <button class="record-btn" id="record-btn" style="box-shadow:0 8px 32px rgba(0,212,255,.2),inset 0 1px 0 rgba(255,255,255,.1)">${ICONS.mic}</button>
+            <div class="record-ripple"></div>
+            <div class="record-ripple" style="animation-delay:0.5s"></div>
+            <div class="record-ripple" style="animation-delay:1s"></div>
+          </div>
+
+          <div class="record-status" id="record-status" style="text-align:center;font-weight:600;color:#00d4ff;margin-bottom:8px">🔴 Click to start recording</div>
+          <div class="record-timer" id="record-timer" style="text-align:center;font-size:28px;font-weight:700;color:#00d4ff;font-family:'JetBrains Mono',monospace;letter-spacing:2px">0:00</div>
+
+          <!-- TRANSCRIPT INPUT -->
+          <div style="margin-top:16px">
+            <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📝 Transcript (Auto-filled or paste)</div>
+            <div class="transcript-area" id="transcript-area" contenteditable="true" style="outline:none;min-height:100px;font-family:'JetBrains Mono',monospace;font-size:12px" data-placeholder="Transcript appears here. You can also paste text manually..."></div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:12px">
+            <button class="btn btn-primary" id="generate-note-btn" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);font-weight:700">⚡ Generate SOAP Note</button>
+            <button class="btn btn-ghost" id="clear-scribe-btn">Clear</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- SOAP NOTE OUTPUT PANEL - FULL WIDTH -->
+    <div class="scribe-panel" style="background:linear-gradient(135deg,rgba(0,212,255,.03),rgba(10,10,20,.5))">
+      <div class="scribe-panel-header">
+        <div class="ai-badge" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);padding:6px 12px"><span class="ai-badge-dot"></span>AXIOM Note Generator</div>
+        <span class="scribe-panel-title">Professional SOAP Documentation</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn-icon btn-sm" id="copy-note-btn" title="Copy to Clipboard">${ICONS.copy}</button>
+          <button class="btn-icon btn-sm" id="print-note-btn" title="Print">${ICONS.print}</button>
+          <button class="btn-icon btn-sm" id="download-note-btn" title="Download">${ICONS.download || '⬇'}</button>
+        </div>
+      </div>
+      <div class="scribe-panel-body">
+        <div id="safety-flags-container" style="margin-bottom:12px"></div>
+        <div id="note-output" class="note-output" style="min-height:300px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5">
+          <div style="color:#4b5563;font-size:13px;text-align:center;padding:60px 20px">
+            <div style="font-size:32px;margin-bottom:8px">📄</div>
+            <div>Generated SOAP note will appear here</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:8px">Record your consultation or paste a transcript, then click "Generate SOAP Note"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @media (max-width:1024px) {
+        .page-content > div:first-child {
+          grid-template-columns: 1fr !important;
+        }
+      }
+    </style>
   `);
 
   let recording = false;
@@ -1029,10 +1086,38 @@ function renderScribe() {
   };
 
   el('copy-note-btn').onclick = () => {
-    navigator.clipboard.writeText(el('note-output').innerText).then(() => Toast.show('Note copied to clipboard', 'success'));
+    const text = el('note-output').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      Toast.show('✅ Note copied to clipboard', 'success');
+    }).catch(() => {
+      Toast.show('❌ Could not copy to clipboard', 'critical');
+    });
   };
 
-  el('print-note-btn').onclick = () => window.print();
+  el('print-note-btn').onclick = () => {
+    Toast.show('📄 Opening print preview...', 'info', 1500);
+    setTimeout(() => window.print(), 200);
+  };
+
+  if (el('download-note-btn')) {
+    el('download-note-btn').onclick = () => {
+      const noteText = el('note-output').innerText;
+      const patientName = el('scribe-patient').options[el('scribe-patient').selectedIndex].text || 'Patient';
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `SOAP_${patientName}_${timestamp}.txt`;
+
+      const blob = new Blob([noteText], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      Toast.show(`✅ Downloaded: ${filename}`, 'success');
+    };
+  }
 }
 
 function demoSoapNote(transcript) {
