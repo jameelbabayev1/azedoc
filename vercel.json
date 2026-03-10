@@ -1,0 +1,17 @@
+{
+  "buildCommand": "echo 'Build complete'",
+  "outputDirectory": "public",
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key",
+    "JWT_SECRET": "@jwt_secret",
+    "ALLOWED_ORIGINS": "https://azedoc.vercel.app,http://localhost:4200",
+    "DEMO_MODE": "false",
+    "ENABLE_AUDIT_LOGGING": "true",
+    "REGION": "azerbaijan"
+  },
+  "functions": {
+    "server.rb": {
+      "runtime": "ruby:3.2"
+    }
+  }
+}
