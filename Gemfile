@@ -2,11 +2,11 @@ source 'https://rubygems.org'
 
 ruby '3.2.0'
 
-# Standard library - all dependencies included in Ruby 3.2+
-# webrick, json, net/http, uri, base64, digest, time, openssl
+# Essential gems for Ruby 3.2+
+gem 'webrick', '~> 1.8'
 
 group :production do
-  # No external gems required for core functionality
+  # No additional gems required for core functionality
 end
 
 group :development do

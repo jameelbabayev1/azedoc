@@ -13,6 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set working directory
 WORKDIR /app
 
+# Copy Gemfile first for dependency caching
+COPY Gemfile Gemfile.lock* ./
+
+# Install Ruby gems
+RUN bundle install --deployment --without development test 2>&1 || bundle install
+
 # Copy application files
 COPY server.rb .
 COPY public/ ./public/
