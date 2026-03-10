@@ -907,3 +907,158 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
   .sidebar { width: var(--sidebar-w) }
   .patients-grid { grid-template-columns: repeat(3, 1fr) }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ENHANCED MOBILE OPTIMIZATION
+═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Ensure proper touch targets */
+  button, a[role="button"], .btn {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure all interactive elements are visible */
+  .sidebar-nav, nav { display: flex; flex-direction: column; gap: 0 }
+  .sidebar-nav button { width: 100%; text-align: left; border-radius: 0 }
+
+  /* Page content proper spacing */
+  .page-content {
+    padding: 12px;
+    overflow-y: auto;
+    height: auto;
+    max-height: calc(100vh - var(--topbar-h) - 12px);
+  }
+
+  /* Ensure tabs are clickable */
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px }
+  .tab-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 10px 8px !important;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* Feature boxes visible */
+  .feature-grid, .patients-grid { grid-template-columns: 1fr !important }
+  .card { margin-bottom: 12px; cursor: pointer }
+  .card:active { opacity: 0.9 }
+
+  /* AI Scribe section */
+  #scribe-section, .medical-scribe-ui {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  /* Voice recording button */
+  .rec-btn, [class*="record"] {
+    display: block !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 12px !important;
+    font-size: 16px !important;
+    cursor: pointer;
+  }
+
+  /* Ensure modals work on mobile */
+  .modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 100%;
+    max-height: 90vh;
+    z-index: 1000;
+    padding: 16px;
+  }
+
+  /* Chat interface better on mobile */
+  .chat-layout {
+    flex-direction: column;
+    height: calc(100vh - var(--topbar-h) - 20px);
+  }
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 150px;
+    padding: 8px;
+  }
+  .chat-input {
+    width: 100% !important;
+    min-height: 40px !important;
+    font-size: 14px;
+    padding: 8px !important;
+  }
+
+  /* SOAP note display */
+  .soap-head {
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+  #note-output {
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  /* Analytics on mobile */
+  .analytics-grid { grid-template-columns: 1fr !important }
+  .insight-card { padding: 12px; margin-bottom: 8px }
+
+  /* Patient details */
+  .patient-detail { padding: 12px; overflow-y: auto }
+  .detail-row { padding: 8px 0; border-bottom: 1px solid var(--border) }
+
+  /* Ensure icons are touchable */
+  .icon-btn, [class*="icon"] { min-width: 44px; min-height: 44px }
+
+  /* Voice feedback visible */
+  .voice-status, .listening-status {
+    display: block !important;
+    padding: 8px;
+    margin: 8px 0;
+    text-align: center;
+  }
+
+  /* Handover layout */
+  .handover-layout { grid-template-columns: 1fr !important }
+  .handover-input { width: 100% !important }
+
+  /* Remove fixed height where possible */
+  [style*="height:"][style*="px"] { height: auto !important }
+
+  /* Proper form layout */
+  form, .form-group { width: 100% }
+  input, textarea, select {
+    width: 100% !important;
+    min-height: 40px;
+    padding: 8px !important;
+    font-size: 14px;
+  }
+
+  /* Toast at bottom */
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    max-width: calc(100vw - 32px);
+    z-index: 9000;
+  }
+}

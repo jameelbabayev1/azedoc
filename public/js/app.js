@@ -1551,6 +1551,54 @@ function startLiveVitals() {
   }, 15000);
 }
 
+// ── Mobile Optimization ────────────────────────────────────
+
+function initMobileOptimizations() {
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile) return;
+
+  // Ensure all buttons are clickable
+  document.querySelectorAll('button, [role="button"], .btn, [class*="btn"]').forEach(btn => {
+    btn.style.minHeight = '48px';
+    btn.style.minWidth = '48px';
+    btn.style.touchAction = 'manipulation';
+    btn.style.cursor = 'pointer';
+  });
+
+  // Improve select and input elements
+  document.querySelectorAll('select, input, textarea').forEach(el => {
+    el.style.minHeight = '40px';
+    el.style.fontSize = '14px';
+    el.style.padding = '8px';
+    el.style.width = '100%';
+    el.style.touchAction = 'manipulation';
+  });
+
+  // Ensure nav items are all visible and clickable
+  document.querySelectorAll('.nav-item, [data-page]').forEach(item => {
+    item.style.cursor = 'pointer';
+    item.style.minHeight = '44px';
+    item.style.padding = '8px';
+  });
+
+  // Fix page content height
+  const pageContent = el('page-content');
+  if (pageContent) {
+    pageContent.style.overflow = 'auto';
+    pageContent.style.maxHeight = `calc(100vh - ${54}px)`;
+  }
+
+  // Close sidebar when navigating on mobile
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const sidebar = el('sidebar');
+      if (sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  });
+}
+
 // ── App Init ───────────────────────────────────────────────
 
 const App = {
@@ -1567,6 +1615,7 @@ const App = {
 
       buildSidebar();
       initTopbar();
+      initMobileOptimizations();
 
       // Add logout button listener
       document.addEventListener('keydown', (e) => {
@@ -1591,6 +1640,20 @@ const App = {
     }
   },
 };
+
+// ── Responsive Handler ────────────────────────────────────
+window.addEventListener('resize', () => {
+  const isMobile = window.innerWidth <= 768;
+  const sidebar = el('sidebar');
+  if (!isMobile && sidebar && sidebar.classList.contains('mobile-open')) {
+    sidebar.classList.remove('mobile-open');
+  }
+});
+
+// ── Touch Enhancements ────────────────────────────────────
+document.addEventListener('touchstart', function() {}, { passive: true });
+document.addEventListener('touchmove', function() {}, { passive: true });
+document.addEventListener('touchend', function() {}, { passive: true });
 
 global.App = App;
 global.Router = Router;
