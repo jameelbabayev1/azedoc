@@ -238,7 +238,7 @@ function renderDashboard() {
     <div class="shift-hero">
       <div class="shift-hero-top">
         <div>
-          <div class="shift-greeting">Good ${greeting()}, ${escHtml(s.doctor.name.split(' ')[1])}</div>
+          <div class="shift-greeting">${greeting()} xeyir, ${escHtml(s.doctor.name.split(' ')[1])}</div>
           <div class="shift-date">${escHtml(s.date)} · ${escHtml(s.ward)}</div>
           <div class="shift-progress-wrap" style="margin-top:14px">
             <div class="shift-progress-bar">
@@ -322,7 +322,7 @@ function renderDashboard() {
 function greeting() {
   const h = new Date().getHours();
   if (h < 12) return 'Sabah';
-  if (h < 17) return 'Günortası';
+  if (h < 17) return 'Günortaçağı';
   return 'Axşam';
 }
 
