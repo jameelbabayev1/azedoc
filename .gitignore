@@ -3,6 +3,7 @@ config.json
 .DS_Store
 .env
 .env.local
+.env.production
 .env.*.local
 logs/
 certs/

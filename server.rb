@@ -16,8 +16,9 @@ require 'time'
 
 class Config
   def self.load
+    # Load from local .env only if it exists AND not in production
     env_file = File.join(__dir__, '.env')
-    if File.exist?(env_file)
+    if File.exist?(env_file) && ENV['RAILWAY_ENVIRONMENT'].nil?
       File.readlines(env_file).each do |line|
         next if line.start_with?('#') || line.strip.empty?
         key, value = line.chomp.split('=', 2)
@@ -31,8 +32,8 @@ class Config
       api_key: ENV['ANTHROPIC_API_KEY'],
       jwt_secret: ENV['JWT_SECRET'] || 'INSECURE-CHANGE-ME',
       allowed_origins: (ENV['ALLOWED_ORIGINS'] || 'http://localhost:4200').split(',').map(&:strip),
-      region: ENV['REGION'] || 'turkey',
-      demo_mode: ENV['DEMO_MODE'] != 'true' ? false : true,
+      region: ENV['REGION'] || 'azerbaijan',
+      demo_mode: ENV['DEMO_MODE'] == 'true' ? true : false,
       enable_audit_logging: ENV['ENABLE_AUDIT_LOGGING'] != 'false' ? true : false,
       log_level: ENV['LOG_LEVEL'] || 'info',
       log_file: ENV['LOG_FILE_PATH'] || './logs/app.log',
@@ -753,6 +754,7 @@ FileUtils.mkdir_p(File.join(__dir__, 'logs'))
 
 server = WEBrick::HTTPServer.new(
   Port: PORT,
+  BindAddress: '0.0.0.0',
   DocumentRoot: PUBLIC_DIR,
   DirectoryIndex: ['index.html'],
   AccessLog: [],
@@ -1164,7 +1166,8 @@ puts "  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚�
 puts ""
 puts "  AZEDOC Clinical AI Platform v2.0 — PRODUCTION READY"
 puts "  ─────────────────────────────────────────────────────────"
-puts "  Server:         http://localhost:#{PORT}"
+puts "  Server:         0.0.0.0:#{PORT}"
+puts "  Environment:    #{ENV['RAILWAY_ENVIRONMENT'] ? 'Railway' : 'Local Development'}"
 puts "  Model:          #{MODEL}"
 puts "  Region:         #{CONFIG[:region]}"
 puts "  API Key:        #{API_KEY ? 'Configured' : 'NOT SET'}"
