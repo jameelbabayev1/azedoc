@@ -1,0 +1,26 @@
+[Unit]
+Description=AZEDOC Clinical AI Platform v2.0
+After=network.target
+Documentation=https://github.com/yourorg/azedoc
+
+[Service]
+Type=simple
+User=%u
+WorkingDirectory=/Users/jamilbabayev/azedoc
+EnvironmentFile=/Users/jamilbabayev/azedoc/.env
+ExecStart=/usr/bin/ruby /Users/jamilbabayev/azedoc/server.rb
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/Users/jamilbabayev/azedoc/logs/app.log
+StandardError=append:/Users/jamilbabayev/azedoc/logs/error.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=10000
+LimitNPROC=512
+
+[Install]
+WantedBy=multi-user.target

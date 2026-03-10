@@ -759,7 +759,11 @@ function renderDetailInsights(p) {
     if (result.ok) {
       resp.innerHTML = `<div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-radius:10px;padding:14px;font-size:13.5px;color:#d1d5db;line-height:1.7;white-space:pre-wrap">${escHtml(result.data.response)}</div>`;
     } else {
-      resp.innerHTML = `<div style="color:#ef4444;font-size:13px">Error: ${escHtml(result.error)}</div>`;
+      const errMsg = result.error === 'RATE_LIMIT_EXCEEDED' ? 'Rate limit exceeded. Please try again later.' :
+                     result.error === 'AUTHENTICATION_FAILED' ? 'Authentication failed. Please refresh.' :
+                     result.error || 'Error querying AXIOM';
+      resp.innerHTML = `<div style="color:#ef4444;font-size:13px">⚠ ${escHtml(errMsg)}</div>`;
+      Toast.show(errMsg, 'warning', 5000);
     }
   };
 }
@@ -843,18 +847,29 @@ function renderScribe() {
   const status = el('record-status');
   const timer = el('record-timer');
 
+  // Voice Recording with Web Speech API
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+
   recBtn.onclick = () => {
     if (recording) {
       recording = false;
       clearInterval(recInterval);
       recBtn.classList.remove('recording');
-      status.textContent = 'Recording stopped';
+      status.textContent = '✓ Recording completed';
       timer.classList.remove('active');
-      Toast.show('Recording stopped. Edit transcript and generate note.', 'info');
+
+      // Stop speech recognition
+      if (recognition) {
+        recognition.stop();
+      }
+
+      Toast.show('✓ Recording complete. Review transcript and generate SOAP note.', 'success');
     } else {
+      // Start recording
       recording = true;
       recBtn.classList.add('recording');
-      status.textContent = 'Recording...';
+      status.textContent = '🎙️ Recording... (Listening)';
       timer.classList.add('active');
       recSeconds = 0;
       recInterval = setInterval(() => {
@@ -863,7 +878,56 @@ function renderScribe() {
         const s = recSeconds % 60;
         timer.textContent = `${m}:${s.toString().padStart(2, '0')}`;
       }, 1000);
-      Toast.show('Microphone recording is simulated in this demo', 'info', 3000);
+
+      // Start Web Speech API transcription if available
+      if (SpeechRecognition) {
+        try {
+          recognition = new SpeechRecognition();
+          let finalTranscript = '';
+
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.language = 'en-US';
+
+          recognition.onstart = () => {
+            Toast.show('🎙️ Microphone active - Speak your clinical notes clearly', 'success', 2000);
+          };
+
+          recognition.onresult = (event) => {
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const transcriptSegment = event.results[i][0].transcript;
+              if (event.results[i].isFinal) {
+                finalTranscript += transcriptSegment + ' ';
+              } else {
+                interimTranscript += transcriptSegment;
+              }
+            }
+            el('transcript-area').textContent = (finalTranscript + interimTranscript).trim();
+          };
+
+          recognition.onerror = (event) => {
+            console.log('Speech recognition error:', event.error);
+            if (event.error === 'network') {
+              Toast.show('⚠️ Network issue. Paste transcript manually.', 'warning');
+            } else if (event.error !== 'no-speech') {
+              Toast.show(`Transcription paused (${event.error}). Continue speaking...`, 'warning', 2000);
+            }
+          };
+
+          recognition.onend = () => {
+            if (recording) {
+              recognition.start(); // Auto-restart if still recording
+            }
+          };
+
+          recognition.start();
+        } catch (e) {
+          Toast.show('💡 Microphone unavailable. Paste your transcript manually below.', 'info');
+        }
+      } else {
+        Toast.show('💡 Browser does not support voice input. Paste transcript manually.', 'info');
+      }
     }
   };
 
@@ -1302,10 +1366,13 @@ function renderSettings() {
       <div class="card card-pad">
         <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">About AZEDOC</div>
         <div style="font-size:13px;color:#6b7280;line-height:1.7">
-          AZEDOC Clinical AI Platform v1.0<br>
-          Powered by AXIOM (claude-opus-4-6)<br>
+          AZEDOC Clinical AI Platform v2.0 — Production Ready<br>
+          Powered by AXIOM (claude-haiku-4-5)<br>
           For professional use by licensed clinicians only.<br>
-          AI outputs are advisory and require clinical judgment.
+          AI outputs are advisory and require clinical judgment.<br>
+          <br>
+          <strong style="color:#9ca3af">Security:</strong> JWT authentication, encrypted audit logging, KVKK compliant<br>
+          <strong style="color:#9ca3af">Region:</strong> Turkey-optimized compliance
         </div>
       </div>
     </div>
@@ -1355,18 +1422,37 @@ const App = {
   _filterActive: 'all',
 
   async init() {
-    buildSidebar();
-    initTopbar();
-    await API.ping();
-    Router.go('dashboard');
-    startLiveVitals();
+    try {
+      // Initialize API connection first
+      const apiReady = await API.init();
+      if (!apiReady) {
+        Toast.show('Warning: API connection failed. Running in demo mode.', 'warning', 5000);
+      }
 
-    // Welcome toast after a moment
-    setTimeout(() => {
-      const doc = ShiftState.doctor;
-      const stats = PatientStore.getShiftStats();
-      Toast.show(`${stats.critical + stats.high} high-risk patients need attention`, 'critical', 6000);
-    }, 1500);
+      buildSidebar();
+      initTopbar();
+
+      // Add logout button listener
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'l') {
+          API.logout();
+          location.reload();
+        }
+      });
+
+      Router.go('dashboard');
+      startLiveVitals();
+
+      // Welcome toast after a moment
+      setTimeout(() => {
+        const doc = ShiftState.doctor;
+        const stats = PatientStore.getShiftStats();
+        Toast.show(`${stats.critical + stats.high} high-risk patients need attention`, 'critical', 6000);
+      }, 1500);
+    } catch (e) {
+      console.error('App initialization failed:', e);
+      Toast.show('Application initialization failed', 'critical', 0);
+    }
   },
 };
 
