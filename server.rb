@@ -173,21 +173,119 @@ RATE_LIMITER = RateLimiter.new(CONFIG[:rate_limit_requests], CONFIG[:rate_limit_
 # ────────────────────────────────────────────────────────────────────
 
 class AnthropicAPI
-  def self.call(system_prompt, messages, max_tokens = 2048)
+  # Advanced LLM Integration with Streaming, Caching, and Multi-Model Support
+
+  MODELS = {
+    'claude-opus-4-6' => { max_tokens: 4096, cost_per_1k_in: 15, cost_per_1k_out: 75 },
+    'claude-sonnet-4-6' => { max_tokens: 4096, cost_per_1k_in: 3, cost_per_1k_out: 15 },
+    'claude-haiku-4-5' => { max_tokens: 2048, cost_per_1k_in: 0.8, cost_per_1k_out: 4 }
+  }.freeze
+
+  @@response_cache = {}
+  @@cache_ttl = 3600 # 1 hour cache
+
+  def self.call(system_prompt, messages, max_tokens = 2048, model = nil)
     unless API_KEY
       return { success: false, error: 'NO_API_KEY', demo_mode: true }
     end
 
+    model ||= MODEL
+
+    # Generate cache key for this request
+    cache_key = generate_cache_key(system_prompt, messages, max_tokens, model)
+
+    # Check cache
+    if @@response_cache[cache_key] && (Time.now.to_i - @@response_cache[cache_key][:timestamp]) < @@cache_ttl
+      return @@response_cache[cache_key][:response].merge(cached: true)
+    end
+
+    # Build request
     uri = URI('https://api.anthropic.com/v1/messages')
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
-    http.read_timeout = 60
+    http.read_timeout = 120
+    http.max_retries = 2
 
     body = {
-      model: MODEL,
+      model: model,
       max_tokens: max_tokens,
       system: system_prompt,
-      messages: messages
+      messages: messages,
+      temperature: 0.7
+    }.to_json
+
+    req = Net::HTTP::Post.new(uri)
+    req['Content-Type'] = 'application/json'
+    req['x-api-key'] = API_KEY
+    req['anthropic-version'] = '2023-06-01'
+    req['user-agent'] = 'AZEDOC/2.0'
+    req.body = body
+
+    resp = http.request(req)
+    parsed = JSON.parse(resp.body)
+
+    if resp.code.to_i == 200
+      content = parsed.dig('content', 0, 'text') || ''
+      usage = parsed['usage'] || {}
+
+      result = {
+        success: true,
+        content: content,
+        usage: usage,
+        model: model,
+        tokens_in: usage['input_tokens'] || 0,
+        tokens_out: usage['output_tokens'] || 0,
+        timestamp: Time.now.to_i,
+        cached: false
+      }
+
+      # Cache successful response
+      @@response_cache[cache_key] = { response: result, timestamp: Time.now.to_i }
+
+      AUDIT_LOG.log('LLM_API_CALL', 'system', 'api_success', {
+        model: model,
+        tokens_in: usage['input_tokens'],
+        tokens_out: usage['output_tokens']
+      })
+
+      result
+    else
+      error_msg = parsed.dig('error', 'message') || "API error #{resp.code}"
+      error_type = parsed.dig('error', 'type') || 'unknown'
+
+      AUDIT_LOG.log('LLM_API_CALL', 'system', 'api_error', {
+        model: model,
+        error_type: error_type,
+        error_msg: error_msg,
+        status_code: resp.code
+      })
+
+      { success: false, error: error_msg, error_type: error_type }
+    end
+  rescue Net::OpenTimeout, Net::ReadTimeout => e
+    { success: false, error: "Request timeout: #{e.class}", error_type: 'timeout' }
+  rescue => e
+    { success: false, error: "Connection error: #{e.class}", error_type: 'connection_error' }
+  end
+
+  def self.call_with_streaming(system_prompt, messages, max_tokens = 2048, model = nil, &block)
+    unless API_KEY
+      yield({ success: false, error: 'NO_API_KEY', demo_mode: true })
+      return
+    end
+
+    model ||= MODEL
+    uri = URI('https://api.anthropic.com/v1/messages')
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.read_timeout = 120
+
+    body = {
+      model: model,
+      max_tokens: max_tokens,
+      system: system_prompt,
+      messages: messages,
+      stream: true
     }.to_json
 
     req = Net::HTTP::Post.new(uri)
@@ -196,17 +294,59 @@ class AnthropicAPI
     req['anthropic-version'] = '2023-06-01'
     req.body = body
 
-    resp = http.request(req)
-    parsed = JSON.parse(resp.body)
+    buffer = ''
+    http.request(req) do |resp|
+      resp.read_body do |chunk|
+        buffer << chunk
 
-    if resp.code.to_i == 200
-      { success: true, content: parsed.dig('content', 0, 'text') || '', usage: parsed['usage'] }
-    else
-      error_msg = parsed.dig('error', 'message') || "API error #{resp.code}"
-      { success: false, error: error_msg }
+        # Process complete events
+        while (event_end = buffer.index("\n"))
+          event_line = buffer[0...event_end]
+          buffer = buffer[(event_end + 1)..-1]
+
+          next if event_line.empty? || !event_line.start_with?('data: ')
+
+          data = event_line[6..-1]
+          next if data == '[DONE]'
+
+          begin
+            event = JSON.parse(data)
+
+            if event['type'] == 'content_block_delta'
+              delta = event.dig('delta', 'text')
+              yield({ type: 'stream', content: delta }) if delta
+            elsif event['type'] == 'message_stop'
+              yield({ type: 'complete', message: event })
+            end
+          rescue JSON::ParserError
+            # Skip malformed events
+          end
+        end
+      end
     end
   rescue => e
-    { success: false, error: "Connection error: #{e.class}" }
+    yield({ success: false, error: "Streaming error: #{e.class}" })
+  end
+
+  def self.generate_cache_key(system_prompt, messages, max_tokens, model)
+    hash_input = "#{system_prompt}|#{messages.to_json}|#{max_tokens}|#{model}"
+    Digest::SHA256.hexdigest(hash_input)
+  end
+
+  def self.get_model_info(model = nil)
+    model ||= MODEL
+    MODELS[model] || MODELS['claude-haiku-4-5']
+  end
+
+  def self.clear_cache
+    @@response_cache.clear
+  end
+
+  def self.estimate_cost(tokens_in, tokens_out, model = nil)
+    info = get_model_info(model)
+    cost_in = (tokens_in.to_f / 1000) * info[:cost_per_1k_in]
+    cost_out = (tokens_out.to_f / 1000) * info[:cost_per_1k_out]
+    (cost_in + cost_out).round(4)
   end
 end
 
@@ -864,6 +1004,147 @@ server.mount_proc('/api/handover') do |req, resp|
     error_msg = SecurityManager.sanitize_error_message(result[:error])
     json_response(resp, { error: 'API_ERROR', message: error_msg }, status: 500, origin: origin)
   end
+end
+
+# GET /api/llm/models - Available LLM models
+server.mount_proc('/api/llm/models') do |req, resp|
+  cors_headers(resp, req['Origin'])
+
+  if req.request_method == 'OPTIONS'
+    resp.body = ''
+    next
+  end
+
+  models = AnthropicAPI::MODELS.map do |name, info|
+    {
+      name: name,
+      max_tokens: info[:max_tokens],
+      cost_per_1k_input: info[:cost_per_1k_in],
+      cost_per_1k_output: info[:cost_per_1k_out]
+    }
+  end
+
+  json_response(resp, {
+    models: models,
+    current_model: MODEL,
+    timestamp: Time.now.iso8601
+  }, origin: req['Origin'])
+end
+
+# POST /api/llm/analyze - Advanced clinical analysis with LLM
+server.mount_proc('/api/llm/analyze') do |req, resp|
+  origin = req['Origin']
+  cors_headers(resp, origin)
+
+  if req.request_method == 'OPTIONS'
+    resp.body = ''
+    next
+  end
+
+  # Rate limiting
+  client_ip = req.peeraddr[3]
+  unless RATE_LIMITER.allowed?(client_ip)
+    json_response(resp, { error: 'RATE_LIMIT_EXCEEDED' }, status: 429, origin: origin)
+    next
+  end
+
+  # Authentication
+  payload = require_auth(req, resp)
+  next unless payload
+
+  body = JSON.parse(req.body) rescue {}
+  analysis_type = SecurityManager.validate_input(body['type'] || 'diagnosis', 50)
+  clinical_data = SecurityManager.validate_input(body['data'] || '', 50000)
+  model_choice = SecurityManager.validate_input(body['model'] || MODEL, 50)
+
+  unless clinical_data && !clinical_data.empty?
+    json_response(resp, { error: 'INVALID_REQUEST', message: 'Clinical data required' }, status: 400, origin: origin)
+    next
+  end
+
+  prompt = case analysis_type
+           when 'diagnosis'
+             "Provide differential diagnoses based on: #{clinical_data}"
+           when 'treatment'
+             "Suggest evidence-based treatment options for: #{clinical_data}"
+           when 'risk'
+             "Assess clinical risk for: #{clinical_data}"
+           else
+             "Analyze: #{clinical_data}"
+           end
+
+  messages = [{ role: 'user', content: prompt }]
+  result = AnthropicAPI.call(CLINICAL_SYSTEM, messages, 2000, model_choice)
+
+  AUDIT_LOG.log('API_CALL', payload['user_id'], 'llm_analysis', {
+    analysis_type: analysis_type,
+    model: model_choice,
+    success: result[:success]
+  })
+
+  if result[:success]
+    json_response(resp, {
+      analysis: result[:content],
+      model_used: model_choice,
+      tokens_used: result[:tokens_in] + result[:tokens_out],
+      cached: result[:cached],
+      timestamp: Time.now.iso8601
+    }, origin: origin)
+  else
+    json_response(resp, { error: 'ANALYSIS_FAILED', message: result[:error] }, status: 500, origin: origin)
+  end
+end
+
+# GET /api/llm/cache/clear - Clear LLM response cache
+server.mount_proc('/api/llm/cache/clear') do |req, resp|
+  cors_headers(resp, req['Origin'])
+
+  if req.request_method == 'OPTIONS'
+    resp.body = ''
+    next
+  end
+
+  # Authentication
+  payload = require_auth(req, resp)
+  next unless payload
+
+  AnthropicAPI.clear_cache
+
+  AUDIT_LOG.log('API_CALL', payload['user_id'], 'cache_clear', {})
+
+  json_response(resp, {
+    message: 'LLM response cache cleared',
+    timestamp: Time.now.iso8601
+  }, origin: req['Origin'])
+end
+
+# POST /api/llm/estimate-cost - Estimate API cost for request
+server.mount_proc('/api/llm/estimate-cost') do |req, resp|
+  cors_headers(resp, req['Origin'])
+
+  if req.request_method == 'OPTIONS'
+    resp.body = ''
+    next
+  end
+
+  # Authentication
+  payload = require_auth(req, resp)
+  next unless payload
+
+  body = JSON.parse(req.body) rescue {}
+  tokens_in = (body['tokens_in'] || 0).to_i
+  tokens_out = (body['tokens_out'] || 0).to_i
+  model = SecurityManager.validate_input(body['model'] || MODEL, 50)
+
+  estimated_cost = AnthropicAPI.estimate_cost(tokens_in, tokens_out, model)
+
+  json_response(resp, {
+    model: model,
+    tokens_in: tokens_in,
+    tokens_out: tokens_out,
+    estimated_cost_usd: estimated_cost,
+    timestamp: Time.now.iso8601
+  }, origin: req['Origin'])
 end
 
 # ────────────────────────────────────────────────────────────────────
