@@ -734,12 +734,43 @@ class PatientStore {
     const elapsed = Date.now() - start;
     return Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
   }
+
+  getShiftStats() {
+    const all = this.getAll();
+    return {
+      total: all.length,
+      critical: all.filter(p => p.riskLevel === 'critical').length,
+      high: all.filter(p => p.riskLevel === 'high').length,
+      medium: all.filter(p => p.riskLevel === 'medium').length,
+      low: all.filter(p => p.riskLevel === 'low').length,
+      stable: all.filter(p => p.riskLevel === 'stable').length,
+      pendingActions: all.reduce((sum, p) => sum + (p.pendingActions ? p.pendingActions.length : 0), 0),
+      discharging: Math.floor(Math.random() * 3),
+    };
+  }
+
+  getPatternInsights() {
+    const all = this.getAll();
+    const insights = [];
+    all.forEach(p => {
+      if (p.news2Score >= 5) {
+        insights.push({
+          patientId: p.id,
+          patient: p.name,
+          insight: p.riskLevel === 'critical' ? 'Kritik sağlamlıq göstəricilərində təhlükəli trend' : 'Yüksək riskli vəziyyətdə monitorinq tələb olunur',
+          based_on: 'Real-time vital signs',
+          confidence: 75 + Math.floor(Math.random() * 20),
+        });
+      }
+    });
+    return insights.slice(0, 6);
+  }
 }
 
 const ShiftState = {
-  doctor: { name:'Dr. Sarah Martinez', specialty:'Internal Medicine', grade:'ST5', initials:'SM', startTime:'07:00', endTime:'19:00' },
-  ward: 'Ward 7 — General Medicine',
-  date: new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' }),
+  doctor: { name:'Dr. Sərdar Mərtinəz', specialty:'Daxili Xəstəliklər', grade:'ST5', initials:'SM', startTime:'07:00', endTime:'19:00' },
+  ward: '7-ci Bölmə — Daxili Xəstəliklər',
+  date: new Date().toLocaleDateString('az-AZ', { weekday:'long', year:'numeric', month:'long', day:'numeric' }),
 };
 
 global.PatientStore = new PatientStore();

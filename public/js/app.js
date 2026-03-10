@@ -1294,8 +1294,8 @@ function renderHandover() {
   const patients = PatientStore.getForHandover();
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">Shift Handover</div>
-      <div class="page-subtitle">Generate AI-powered handover summary for the incoming team</div>
+      <div class="page-title">Smena Dəyişdirmə</div>
+      <div class="page-subtitle">Gələn komanda üçün AI-istiqamətlənmiş dəyişdirmə xülasəsi əmələ gətirin</div>
     </div>
     <div class="handover-layout">
       <div class="handover-panel">
@@ -1388,14 +1388,14 @@ function renderHandover() {
 
 function demoHandoverSummary(patients, doctor, shiftEnd) {
   const critical = patients.filter(p => p.riskLevel === 'critical' || p.riskLevel === 'high');
-  return `<strong style="color:#00d4ff">SHIFT SUMMARY</strong>\n` +
-    `End-of-shift handover for ${doctor} at ${shiftEnd}. Ward 7 General Medicine. ` +
-    `${patients.length} patients total, ${critical.length} high-priority.\n\n` +
-    `<strong style="color:#00d4ff">NIGHT WATCHLIST</strong>\n` +
-    critical.slice(0, 5).map(p => `• ${p.name} (Bed ${p.bed}) — ${p.diagnosis} · NEWS2: ${p.news2Score}`).join('\n') + '\n\n' +
-    `<strong style="color:#00d4ff">PENDING ACTIONS</strong>\n` +
+  return `<strong style="color:#00d4ff">SMENA XÜLASƏSI</strong>\n` +
+    `Smena sonu dəyişdirmə: ${doctor} ${shiftEnd}-də. 7-ci Bölmə Daxili Xəstəliklər. ` +
+    `${patients.length} xəstə cəmi, ${critical.length} yüksək prioritet.\n\n` +
+    `<strong style="color:#00d4ff">GECƏ NƏZARƏT SİYAHISI</strong>\n` +
+    critical.slice(0, 5).map(p => `• ${p.name} (Çarpayı ${p.bed}) — ${p.diagnosis} · NEWS2: ${p.news2Score}`).join('\n') + '\n\n' +
+    `<strong style="color:#00d4ff">GÖZLƏYƏN ƏMƏLIYYATLAR</strong>\n` +
     patients.flatMap(p => (p.pendingActions || []).filter(a => a.priority === 'urgent').map(a => `• [${p.name}] ${a.action}`)).slice(0, 6).join('\n') + '\n\n' +
-    `<div style="padding:8px;background:rgba(245,158,11,.08);border-radius:6px;font-size:12px;color:#f59e0b">⚠ Demo mode — connect ANTHROPIC_API_KEY for AI-generated handover</div>`;
+    `<div style="padding:8px;background:rgba(245,158,11,.08);border-radius:6px;font-size:12px;color:#f59e0b">⚠ Demo rejimi — AI-yaratdırılmış dəyişdirmə üçün ANTHROPIC_API_KEY-i bağlayın</div>`;
 }
 
 // ── Page: Analytics ────────────────────────────────────────
