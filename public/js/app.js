@@ -1121,18 +1121,18 @@ function renderScribe() {
 }
 
 function demoSoapNote(transcript) {
-  return `<div class="soap-head">SUBJECTIVE</div>
-Patient presents with symptoms as described in transcript. History taken as documented.<br><br>
-<div class="soap-head">OBJECTIVE</div>
-Vital signs as per chart. Examination findings documented.<br><br>
-<div class="soap-head">ASSESSMENT</div>
-Clinical impression based on presenting complaint and findings.<br><br>
+  return `<div class="soap-head">SUBYEKTİV</div>
+Xəstə transkripsiyada təsvir edilən simptomlarla müraciət edir. Anamnez qeyd olunmuşdur.<br><br>
+<div class="soap-head">OBYEKTİV</div>
+Cərəyan tərəfindən vital əlamətlər. Fiziki müayinə nəticələri sənədləşdirilmişdir.<br><br>
+<div class="soap-head">QİYMƏTLƏNDİRMƏ</div>
+Klinik baxış əsas şikayət və tapıntılara əsaslanır.<br><br>
 <div class="soap-head">PLAN</div>
-1. Investigations as clinically indicated<br>
-2. Treatment as per guidelines<br>
-3. Senior review if deterioration<br>
-4. Follow-up arranged<br><br>
-<div style="margin-top:8px;padding:8px;background:rgba(245,158,11,.08);border-radius:6px;font-size:12px;color:#f59e0b">⚠ Demo mode — connect ANTHROPIC_API_KEY for AI-generated notes</div>`;
+1. Kliniki göstərişlərə uyğun araşdırmalar<br>
+2. Rehbərlərə uyğun müalicə<br>
+3. Vəziyyətin pisləşməsi halında məsləhət<br>
+4. Sonrası izlənmə tərtib edilmişdir<br><br>
+<div style="margin-top:8px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:#3b82f6">ℹ Demo Rejimi — Tam AI SOAP qeydləri üçün ANTHROPIC_API_KEY təyin edin</div>`;
 }
 
 // ── Page: AI Assistant ─────────────────────────────────────
@@ -1277,9 +1277,9 @@ async function sendChatMessage() {
   if (result.ok) {
     responseText = result.data.response;
   } else if (API.isDemo()) {
-    responseText = `**Demo Mode** — I'm AXIOM, your clinical AI assistant. In demo mode I cannot access the Claude API. Please set your ANTHROPIC_API_KEY to enable full AI responses.\n\nYour question was: *"${text}"*`;
+    responseText = `Demo Rejimi — AXIOM klinik AI yardımcısıdır. Demo rejimində Claude API-yə qoşula bilmirəm. Tam AI cavabları üçün ANTHROPIC_API_KEY təyin edin.\n\nSizin sual: "${text}"`;
   } else {
-    responseText = `Error connecting to AXIOM: ${result.error}`;
+    responseText = `AXIOM-a qoşulma xətası: ${result.error}`;
   }
 
   const aiMsg = { role: 'assistant', content: responseText, time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) };
@@ -1395,7 +1395,7 @@ function demoHandoverSummary(patients, doctor, shiftEnd) {
     critical.slice(0, 5).map(p => `• ${p.name} (Çarpayı ${p.bed}) — ${p.diagnosis} · NEWS2: ${p.news2Score}`).join('\n') + '\n\n' +
     `<strong style="color:#00d4ff">GÖZLƏYƏN ƏMƏLIYYATLAR</strong>\n` +
     patients.flatMap(p => (p.pendingActions || []).filter(a => a.priority === 'urgent').map(a => `• [${p.name}] ${a.action}`)).slice(0, 6).join('\n') + '\n\n' +
-    `<div style="padding:8px;background:rgba(245,158,11,.08);border-radius:6px;font-size:12px;color:#f59e0b">⚠ Demo rejimi — AI-yaratdırılmış dəyişdirmə üçün ANTHROPIC_API_KEY-i bağlayın</div>`;
+    `<div style="padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:#3b82f6">ℹ Demo Rejimi — Tam AI-yaratdırılmış dəyişdirmə üçün ANTHROPIC_API_KEY təyin edin</div>`;
 }
 
 // ── Page: Analytics ────────────────────────────────────────
