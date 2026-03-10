@@ -5,19 +5,20 @@ LABEL maintainer="AZEDOC Team"
 LABEL version="2.0.0"
 LABEL description="Clinical AI Platform for Hospitals"
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy Gemfile first for dependency caching
-COPY Gemfile Gemfile.lock* ./
+# Copy Gemfile for gem installation
+COPY Gemfile ./
 
-# Install Ruby gems
-RUN bundle install --deployment --without development test 2>&1 || bundle install
+# Install gems
+RUN gem install bundler && bundle install --jobs 4 --retry 3
 
 # Copy application files
 COPY server.rb .
@@ -34,5 +35,5 @@ EXPOSE 4200
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:4200/api/health || exit 1
 
-# Run server
-CMD ["ruby", "server.rb"]
+# Run server with bundle exec
+CMD ["bundle", "exec", "ruby", "server.rb"]
