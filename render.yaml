@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: azedoc
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        scope: build,runtime
+      - key: JWT_SECRET
+        scope: runtime
+      - key: REGION
+        value: azerbaijan
+      - key: DEMO_MODE
+        value: "false"
+      - key: ENABLE_AUDIT_LOGGING
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
