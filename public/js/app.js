@@ -121,12 +121,12 @@ const Router = {
 // ── Sidebar ────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { id: 'dashboard',  label: 'Dashboard',    icon: 'dashboard' },
-  { id: 'patients',   label: 'Patients',     icon: 'patients',  badge: () => PatientStore.getHighRisk().length || null },
-  { id: 'scribe',     label: 'AI Scribe',    icon: 'scribe' },
-  { id: 'assistant',  label: 'AI Assistant', icon: 'assistant' },
-  { id: 'handover',   label: 'Handover',     icon: 'handover' },
-  { id: 'analytics',  label: 'Analytics',    icon: 'analytics' },
+  { id: 'dashboard',  label: 'İnformasiya Paneli',  icon: 'dashboard' },
+  { id: 'patients',   label: 'Xəstələr',           icon: 'patients',  badge: () => PatientStore.getHighRisk().length || null },
+  { id: 'scribe',     label: 'Tibbi Qeydçi',       icon: 'scribe' },
+  { id: 'assistant',  label: 'AI Köməkçi',        icon: 'assistant' },
+  { id: 'handover',   label: 'Dəyişdirmə',        icon: 'handover' },
+  { id: 'analytics',  label: 'Analitika',         icon: 'analytics' },
 ];
 
 function buildSidebar() {
@@ -146,7 +146,7 @@ function buildSidebar() {
   }).join('') + `
     <div class="nav-item" data-page="settings">
       <span class="nav-icon">${ICONS.settings}</span>
-      <span class="nav-label">Settings</span>
+      <span class="nav-label">Parametrlər</span>
     </div>
   `;
 
@@ -773,8 +773,8 @@ function renderDetailInsights(p) {
 function renderScribe() {
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">📋 Medical Scribe — AI Documentation Assistant</div>
-      <div class="page-subtitle">Convert voice consultation into professional SOAP notes in seconds</div>
+      <div class="page-title">📋 Tibbi Qeydçi — AI Sənədləndirmə Köməkçi</div>
+      <div class="page-subtitle">Səs məsləhətini saniyələr ərzində peşəkar SOAP qeydlərinə çevirin</div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-bottom:16px;max-width:100%;overflow:hidden">
@@ -782,7 +782,7 @@ function renderScribe() {
       <div class="scribe-panel" style="background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(124,58,237,.05));border:1px solid rgba(0,212,255,.2)">
         <div class="scribe-panel-header">
           <span style="font-size:16px">💡</span>
-          <span class="scribe-panel-title" style="color:#00d4ff">Doctor Guidelines</span>
+          <span class="scribe-panel-title" style="color:#00d4ff">Hekim Rəhbərliyi</span>
         </div>
         <div class="scribe-panel-body" style="font-size:13px;color:#cbd5e0;line-height:1.6">
           <div style="padding:0;display:flex;flex-direction:column;gap:12px">
@@ -858,7 +858,7 @@ function renderScribe() {
 
           <!-- ACTION BUTTONS -->
           <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:12px">
-            <button class="btn btn-primary" id="generate-note-btn" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);font-weight:700">⚡ Generate SOAP Note</button>
+            <button class="btn btn-primary" id="generate-note-btn" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);font-weight:700">⚡ SOAP Qeydi Yaradın</button>
             <button class="btn btn-ghost" id="clear-scribe-btn">Clear</button>
           </div>
         </div>
@@ -869,7 +869,7 @@ function renderScribe() {
     <div class="scribe-panel" style="background:linear-gradient(135deg,rgba(0,212,255,.03),rgba(10,10,20,.5))">
       <div class="scribe-panel-header">
         <div class="ai-badge" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);padding:6px 12px"><span class="ai-badge-dot"></span>AXIOM Note Generator</div>
-        <span class="scribe-panel-title">Professional SOAP Documentation</span>
+        <span class="scribe-panel-title">Peşəkar SOAP Sənədləndirmə</span>
         <div style="margin-left:auto;display:flex;gap:6px">
           <button class="btn-icon btn-sm" id="copy-note-btn" title="Copy to Clipboard">${ICONS.copy}</button>
           <button class="btn-icon btn-sm" id="print-note-btn" title="Print">${ICONS.print}</button>
