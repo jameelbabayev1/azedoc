@@ -1,0 +1,31 @@
+{
+  "name": "azedoc-medical-scribe",
+  "version": "2.0.0",
+  "description": "AZEDOC — Professional AI Medical Documentation Assistant for Azerbaijan Healthcare System",
+  "type": "module",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "main": "server.rb",
+  "scripts": {
+    "start": "ruby server.rb",
+    "dev": "ruby server.rb",
+    "test": "echo 'Run manual tests via browser at http://localhost:4200'"
+  },
+  "keywords": [
+    "medical",
+    "scribe",
+    "SOAP",
+    "healthcare",
+    "Azerbaijan",
+    "AI",
+    "documentation",
+    "clinical"
+  ],
+  "author": "AZEDOC Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jameelbabayev1/azedoc.git"
+  }
+}
