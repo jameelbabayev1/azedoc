@@ -8,17 +8,13 @@ LABEL description="Clinical AI Platform for Hospitals"
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy Gemfile for gem installation
-COPY Gemfile ./
-
-# Install gems
-RUN gem install bundler && bundle install --jobs 4 --retry 3
+# Install webrick gem (required for Ruby 3.2)
+RUN gem install webrick -v '~> 1.8' --no-document
 
 # Copy application files
 COPY server.rb .
@@ -35,5 +31,5 @@ EXPOSE 4200
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:4200/api/health || exit 1
 
-# Run server with bundle exec
-CMD ["bundle", "exec", "ruby", "server.rb"]
+# Run server
+CMD ["ruby", "server.rb"]
