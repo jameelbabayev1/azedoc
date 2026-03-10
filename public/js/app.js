@@ -1,4 +1,4 @@
-// AZEDOC — Main Application
+// AZEDOC - Main Application
 
 (function(global) {
 'use strict';
@@ -10,13 +10,13 @@ function el(id) { return document.getElementById(id); }
 function html(el, content) { el.innerHTML = content; }
 
 function fmtTime(iso) {
-  if (!iso) return '—';
+  if (!iso) return '-';
   const d = new Date(iso);
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
 function fmtDateTime(iso) {
-  if (!iso) return '—';
+  if (!iso) return '-';
   const d = new Date(iso);
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' +
          d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -321,9 +321,9 @@ function renderDashboard() {
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 12) return 'Sabah';
-  if (h < 17) return 'Günortaçağı';
-  return 'Axşam';
+  if (h < 12) return 'Sabahın';
+  if (h < 17) return 'Günortaçağın';
+  return 'Axşamın';
 }
 
 function updateApiStatusBadge() {
@@ -333,7 +333,7 @@ function updateApiStatusBadge() {
   badge.innerHTML = `
     <div class="ai-badge">
       <span class="ai-badge-dot"></span>
-      ${isDemo ? 'Demo Rejimi — API Açarı Yoxdur' : 'AXIOM AI Bağlandı'}
+      ${isDemo ? 'Demo Rejimi - API Açarı Yoxdur' : 'AXIOM AI Bağlandı'}
     </div>
   `;
 }
@@ -473,7 +473,7 @@ function renderPatientDetail(id) {
           <span class="detail-chip">Çarpayı ${p.bed}</span>
           <span class="detail-chip">Qəbul Tarixi: ${fmtDateTime(p.admissionDate)}</span>
           <span class="detail-chip">${escHtml(p.consultant)}</span>
-          ${p.allergies?.length ? `<span class="detail-chip" style="color:#ef4444;border-color:rgba(239,68,68,.3)">⚠ ${p.allergies.map(a => a.allergen).join(', ')}</span>` : ''}
+          ${p.allergies?.length ? `<span class="detail-chip" style="color:#ef4444;border-color:rgba(239,68,68,.3)"> ${p.allergies.map(a => a.allergen).join(', ')}</span>` : ''}
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
@@ -639,8 +639,8 @@ function renderDetailMeds(p) {
     </div>
     ${p.allergies?.length ? `
       <div style="margin-top:12px;padding:12px 16px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px">
-        <div style="font-size:12px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⚠ Allergilər</div>
-        ${p.allergies.map(a => `<div style="font-size:13px;color:#f9fafb">${escHtml(a.allergen)} <span style="color:#6b7280">— ${escHtml(a.reaction)} (${escHtml(a.severity)})</span></div>`).join('')}
+        <div style="font-size:12px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px"> Allergilər</div>
+        ${p.allergies.map(a => `<div style="font-size:13px;color:#f9fafb">${escHtml(a.allergen)} <span style="color:#6b7280">- ${escHtml(a.reaction)} (${escHtml(a.severity)})</span></div>`).join('')}
       </div>
     ` : ''}
   `);
@@ -653,7 +653,7 @@ function renderDetailTimeline(p) {
       ${events.map(e => `
         <div class="timeline-item">
           <div class="timeline-dot ${e.severity}">
-            ${e.severity === 'critical' ? '🚨' : e.severity === 'warn' ? '⚠️' : '✓'}
+            ${e.severity === 'critical' ? '' : e.severity === 'warn' ? '' : ''}
           </div>
           <div class="timeline-content">
             <div class="timeline-event">${escHtml(e.event)}</div>
@@ -723,7 +723,7 @@ function renderDetailInsights(p) {
   html(el('tab-content'), `
     <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px">
       <div class="ai-badge"><span class="ai-badge-dot"></span> AXIOM Analysis</div>
-      ${API.isDemo() ? '<span style="font-size:12px;color:#6b7280">Demo mode — connect API key for live AI insights</span>' : ''}
+      ${API.isDemo() ? '<span style="font-size:12px;color:#6b7280">Demo mode - connect API key for live AI insights</span>' : ''}
     </div>
     ${insights.length ? insights.map(ins => `
       <div class="insight-card" style="margin-bottom:12px">
@@ -762,7 +762,7 @@ function renderDetailInsights(p) {
       const errMsg = result.error === 'RATE_LIMIT_EXCEEDED' ? 'Limit aşılmışdır. Sonra yenidən cəhd edin.' :
                      result.error === 'AUTHENTICATION_FAILED' ? 'Autentifikasiya uğursuz oldu. Yenilə.' :
                      result.error || 'AXIOM sorğusunda xəta';
-      resp.innerHTML = `<div style="color:#ef4444;font-size:13px">⚠ ${escHtml(errMsg)}</div>`;
+      resp.innerHTML = `<div style="color:#ef4444;font-size:13px"> ${escHtml(errMsg)}</div>`;
       Toast.show(errMsg, 'warning', 5000);
     }
   };
@@ -773,7 +773,7 @@ function renderDetailInsights(p) {
 function renderScribe() {
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">📋 Tibbi Qeydçi — AI Sənədləndirmə Köməkçi</div>
+      <div class="page-title"> Tibbi Qeydçi - AI Sənədləndirmə Köməkçi</div>
       <div class="page-subtitle">Səs məsləhətini saniyələr ərzində peşəkar SOAP qeydlərinə çevirin</div>
     </div>
 
@@ -787,7 +787,7 @@ function renderScribe() {
         <div class="scribe-panel-body" style="font-size:13px;color:#cbd5e0;line-height:1.6">
           <div style="padding:0;display:flex;flex-direction:column;gap:12px">
             <div style="padding:10px;background:rgba(0,212,255,.05);border-radius:8px;border-left:3px solid #00d4ff">
-              <strong style="color:#00d4ff">✓ Təmiz Sənədləndirmə üçün Ən Yaxşı Format:</strong><br>
+              <strong style="color:#00d4ff"> Təmiz Sənədləndirmə üçün Ən Yaxşı Format:</strong><br>
               Təbii amma təşkil olunmuş şəkildə danışın. Nümunə:<br>
               <span style="color:#94a3b8;font-style:italic">"Xəstə 45 yaşlı kişidir. Əsas şikayət 2 gündür davam edən göğüs ağrısıdır. Fəaliyyətdən sonra başlamışdır. Nəfəs almada çətinlik ilə əlaqəlidir. Vital göstəricilər: temp 37, HR 85, BP 130/80, O2 98%. Ürək səsləri normal. Ağciyərlər aydın."</span>
             </div>
@@ -953,7 +953,7 @@ function renderScribe() {
       console.log('Səs tanıması xətası:', event.error);
 
       if (event.error === 'network') {
-        Toast.show('⚠️ Şəbəkə xətası - Danışmağa davam edin, avtomatik yenidən cəhd olunacaq', 'warning', 2000);
+        Toast.show(' Şəbəkə xətası - Danışmağa davam edin, avtomatik yenidən cəhd olunacaq', 'warning', 2000);
       } else if (event.error === 'not-allowed') {
         Toast.show('❌ Mikrofon icazəsi verilmədi - Transkripsiyonu əl ilə yapışdırın', 'critical', 3000);
         recording = false;
@@ -961,7 +961,7 @@ function renderScribe() {
       } else if (event.error !== 'no-speech' && event.error !== 'audio-capture') {
         // Ignore no-speech and audio-capture errors
         if (recording && event.error !== 'aborted') {
-          Toast.show(`⚠️ ${event.error} - Danışmağa davam edin...`, 'info', 1000);
+          Toast.show(` ${event.error} - Danışmağa davam edin...`, 'info', 1000);
         }
       }
     };
@@ -996,7 +996,7 @@ function renderScribe() {
         }
       }
 
-      status.textContent = '✓ Qeydiyyat tamamlandı';
+      status.textContent = ' Qeydiyyat tamamlandı';
       Toast.show('✅ Recording stopped. Review and generate SOAP note.', 'success');
     } else {
       // Start recording
@@ -1132,7 +1132,7 @@ Klinik baxış əsas şikayət və tapıntılara əsaslanır.<br><br>
 2. Rehbərlərə uyğun müalicə<br>
 3. Vəziyyətin pisləşməsi halında məsləhət<br>
 4. Sonrası izlənmə tərtib edilmişdir<br><br>
-<div style="margin-top:8px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:#3b82f6">ℹ Demo Rejimi — Tam AI SOAP qeydləri üçün ANTHROPIC_API_KEY təyin edin</div>`;
+<div style="margin-top:8px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:#3b82f6"> Demo Rejimi - Tam AI SOAP qeydləri üçün ANTHROPIC_API_KEY təyin edin</div>`;
 }
 
 // ── Page: AI Assistant ─────────────────────────────────────
@@ -1277,7 +1277,7 @@ async function sendChatMessage() {
   if (result.ok) {
     responseText = result.data.response;
   } else if (API.isDemo()) {
-    responseText = `Demo Rejimi — AXIOM klinik AI yardımcısıdır. Demo rejimində Claude API-yə qoşula bilmirəm. Tam AI cavabları üçün ANTHROPIC_API_KEY təyin edin.\n\nSizin sual: "${text}"`;
+    responseText = `Demo Rejimi - AXIOM klinik AI yardımcısıdır. Demo rejimində Claude API-yə qoşula bilmirəm. Tam AI cavabları üçün ANTHROPIC_API_KEY təyin edin.\n\nSizin sual: "${text}"`;
   } else {
     responseText = `AXIOM-a qoşulma xətası: ${result.error}`;
   }
@@ -1392,10 +1392,10 @@ function demoHandoverSummary(patients, doctor, shiftEnd) {
     `Smena sonu dəyişdirmə: ${doctor} ${shiftEnd}-də. 7-ci Bölmə Daxili Xəstəliklər. ` +
     `${patients.length} xəstə cəmi, ${critical.length} yüksək prioritet.\n\n` +
     `<strong style="color:#00d4ff">GECƏ NƏZARƏT SİYAHISI</strong>\n` +
-    critical.slice(0, 5).map(p => `• ${p.name} (Çarpayı ${p.bed}) — ${p.diagnosis} · NEWS2: ${p.news2Score}`).join('\n') + '\n\n' +
+    critical.slice(0, 5).map(p => `- ${p.name} (Çarpayı ${p.bed}) - ${p.diagnosis} · NEWS2: ${p.news2Score}`).join('\n') + '\n\n' +
     `<strong style="color:#00d4ff">GÖZLƏYƏN ƏMƏLIYYATLAR</strong>\n` +
-    patients.flatMap(p => (p.pendingActions || []).filter(a => a.priority === 'urgent').map(a => `• [${p.name}] ${a.action}`)).slice(0, 6).join('\n') + '\n\n' +
-    `<div style="padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:#3b82f6">ℹ Demo Rejimi — Tam AI-yaratdırılmış dəyişdirmə üçün ANTHROPIC_API_KEY təyin edin</div>`;
+    patients.flatMap(p => (p.pendingActions || []).filter(a => a.priority === 'urgent').map(a => `- [${p.name}] ${a.action}`)).slice(0, 6).join('\n') + '\n\n' +
+    `<div style="padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:#3b82f6"> Demo Rejimi - Tam AI-yaratdırılmış dəyişdirmə üçün ANTHROPIC_API_KEY təyin edin</div>`;
 }
 
 // ── Page: Analytics ────────────────────────────────────────
@@ -1486,7 +1486,7 @@ function renderSettings() {
           <div class="ai-badge"><span class="ai-badge-dot" style="background:${API.isDemo() ? '#f59e0b' : '#10b981'}"></span>${API.isDemo() ? 'Demo Rejimi' : 'Bağlandı'}</div>
           <div style="flex:1">
             <div style="font-size:13px;color:#f9fafb">${API.isDemo() ? 'API açarı quraşdırılmamışdır' : 'ANTHROPIC_API_KEY fəal'}</div>
-            <div style="font-size:11.5px;color:#6b7280;margin-top:2px">${API.isDemo() ? 'AI xüsusiyyətlərini aktivləşdirmək üçün ANTHROPIC_API_KEY mühit dəyişənini təyin edin' : 'AI xüsusiyyətləri fəal — Model: claude-opus-4-6'}</div>
+            <div style="font-size:11.5px;color:#6b7280;margin-top:2px">${API.isDemo() ? 'AI xüsusiyyətlərini aktivləşdirmək üçün ANTHROPIC_API_KEY mühit dəyişənini təyin edin' : 'AI xüsusiyyətləri fəal - Model: claude-opus-4-6'}</div>
           </div>
         </div>
       </div>
@@ -1502,7 +1502,7 @@ function renderSettings() {
       <div class="card card-pad">
         <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">AZEDOC Haqqında</div>
         <div style="font-size:13px;color:#6b7280;line-height:1.7">
-          AZEDOC Klinik AI Platforması v2.0 — İstifadəyə Hazır<br>
+          AZEDOC Klinik AI Platforması v2.0 - İstifadəyə Hazır<br>
           AXIOM (claude-haiku-4-5) ilə İşləyən<br>
           Yalnız lisenziyalı həkimlər tərəfindən istifadə üçün nəzərdə tutulmuşdur.<br>
           AI nəticələri məsləhət xarakterlidir və klinik mühakimə tələb edir.<br>
