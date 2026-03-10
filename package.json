@@ -27,5 +27,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jameelbabayev1/azedoc.git"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.78.0"
   }
 }

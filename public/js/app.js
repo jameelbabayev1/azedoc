@@ -26,11 +26,11 @@ function timeAgo(iso) {
   if (!iso) return '';
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
+  if (m < 1) return 'az əvvəl';
+  if (m < 60) return `${m}d əvvəl`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return `${h}s əvvəl`;
+  return `${Math.floor(h / 24)}g əvvəl`;
 }
 
 function news2Class(score) {
@@ -85,7 +85,7 @@ function showModal(title, body, actions = []) {
         <div class="modal-body">${body}</div>
         <div class="modal-actions">
           ${actionsHtml}
-          <button class="btn btn-ghost" id="modal-close">Close</button>
+          <button class="btn btn-ghost" id="modal-close">Bağla</button>
         </div>
       </div>
     </div>
@@ -216,12 +216,12 @@ function showAlertsModal() {
   const items = critical.map(p =>
     `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)">
       <strong style="color:#f9fafb">${escHtml(p.name)}</strong>
-      <span style="color:#6b7280;font-size:12px;margin-left:8px">Bed ${p.bed}</span>
+      <span style="color:#6b7280;font-size:12px;margin-left:8px">Çarpayı ${p.bed}</span>
       <div style="font-size:12.5px;color:#9ca3af;margin-top:2px">${escHtml(p.diagnosis)}</div>
       <div style="font-size:11.5px;color:#ef4444;margin-top:2px">NEWS2: ${p.news2Score} · ${p.riskLevel.toUpperCase()}</div>
     </div>`
   ).join('');
-  showModal('Active Alerts', items || '<p style="color:#6b7280">No active critical alerts.</p>');
+  showModal('Fəal Xəbərdarlıqlar', items || '<p style="color:#6b7280">Aktiv kritik xəbərdarlıq yoxdur.</p>');
 }
 
 // ── Page: Dashboard ────────────────────────────────────────
@@ -398,8 +398,8 @@ function bindPatientCardClicks() {
 function renderPatients() {
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">Patient List</div>
-      <div class="page-subtitle">${ShiftState.ward} · ${PatientStore.getAll().length} patients</div>
+      <div class="page-title">Xəstə Siyahısı</div>
+      <div class="page-subtitle">${ShiftState.ward} · ${PatientStore.getAll().length} xəstə</div>
     </div>
     <div class="filter-bar" id="filter-bar">
       <button class="filter-btn active" data-filter="all">Hamısı</button>
@@ -444,7 +444,7 @@ function renderPatientsList(q = '') {
   }
 
   if (!patients.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🔍</div><div class="empty-state-text">No patients found</div></div>`;
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🔍</div><div class="empty-state-text">Xəstə tapılmadı</div></div>`;
     return;
   }
 
@@ -458,10 +458,10 @@ function renderPatientDetail(id) {
   const p = PatientStore.getById(id);
   if (!p) { Router.go('patients'); return; }
 
-  const tabs = ['Overview', 'Vitals', 'Labs', 'Medications', 'Timeline', 'Notes', 'AI Insights'];
+  const tabs = ['Ümumi', 'Vital', 'Laboratoriya', 'Dərmanlar', 'Vaxt Xətti', 'Qeydlər', 'AI Təhliləri'];
 
   html(el('page-content'), `
-    <div class="back-btn" id="back-btn">${ICONS.chevronLeft} Back to patients</div>
+    <div class="back-btn" id="back-btn">${ICONS.chevronLeft} Xəstələrə qayıt</div>
 
     <div class="patient-detail-header">
       <div class="patient-detail-avatar">${p.name.split(' ').map(n => n[0]).join('')}</div>
@@ -469,9 +469,9 @@ function renderPatientDetail(id) {
         <div class="patient-detail-name">${escHtml(p.name)}</div>
         <div class="patient-detail-meta">
           <span class="detail-chip">${p.age}y ${p.gender}</span>
-          <span class="detail-chip">DOB: ${p.dob}</span>
-          <span class="detail-chip">Bed ${p.bed}</span>
-          <span class="detail-chip">Admitted: ${fmtDateTime(p.admissionDate)}</span>
+          <span class="detail-chip">Doğum Tarixi: ${p.dob}</span>
+          <span class="detail-chip">Çarpayı ${p.bed}</span>
+          <span class="detail-chip">Qəbul Tarixi: ${fmtDateTime(p.admissionDate)}</span>
           <span class="detail-chip">${escHtml(p.consultant)}</span>
           ${p.allergies?.length ? `<span class="detail-chip" style="color:#ef4444;border-color:rgba(239,68,68,.3)">⚠ ${p.allergies.map(a => a.allergen).join(', ')}</span>` : ''}
         </div>
@@ -524,11 +524,11 @@ function renderDetailOverview(p) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div>
         <div class="vitals-grid" style="margin-bottom:16px">
-          ${vitalBox('❤️', v.hr, 'bpm', 'Heart Rate', v.hr > 100 || v.hr < 50 ? (v.hr > 130 ? 'critical' : 'abnormal') : '')}
-          ${vitalBox('🩸', `${v.bp_sys}/${v.bp_dia}`, 'mmHg', 'Blood Pressure', v.bp_sys < 100 ? 'critical' : v.bp_sys < 110 ? 'abnormal' : '')}
-          ${vitalBox('💧', `${v.spo2}%`, '', 'SpO2', v.spo2 < 92 ? 'critical' : v.spo2 < 95 ? 'abnormal' : '')}
-          ${vitalBox('🌡️', `${v.temp}°C`, '', 'Temperature', v.temp > 39 ? 'critical' : v.temp > 38 ? 'abnormal' : '')}
-          ${vitalBox('🌬️', v.rr, '/min', 'Resp Rate', v.rr > 24 ? 'critical' : v.rr > 20 ? 'abnormal' : '')}
+          ${vitalBox('❤️', v.hr, 'dəfə/dəq', 'Ürək Döyüntüsü', v.hr > 100 || v.hr < 50 ? (v.hr > 130 ? 'critical' : 'abnormal') : '')}
+          ${vitalBox('🩸', `${v.bp_sys}/${v.bp_dia}`, 'mmHg', 'Qan Təzyiqi', v.bp_sys < 100 ? 'critical' : v.bp_sys < 110 ? 'abnormal' : '')}
+          ${vitalBox('💧', `${v.spo2}%`, '', 'Oksigen Satürasyonu', v.spo2 < 92 ? 'critical' : v.spo2 < 95 ? 'abnormal' : '')}
+          ${vitalBox('🌡️', `${v.temp}°C`, '', 'Temperatur', v.temp > 39 ? 'critical' : v.temp > 38 ? 'abnormal' : '')}
+          ${vitalBox('🌬️', v.rr, '/dəq', 'Tənəffüs Tezliyi', v.rr > 24 ? 'critical' : v.rr > 20 ? 'abnormal' : '')}
         </div>
       </div>
       <div>
@@ -541,7 +541,7 @@ function renderDetailOverview(p) {
             </div>
             <span style="font-size:10.5px;font-weight:600;color:${a.priority === 'urgent' ? '#ef4444' : '#f59e0b'};background:${a.priority === 'urgent' ? 'rgba(239,68,68,.12)' : 'rgba(245,158,11,.12)'};padding:2px 8px;border-radius:4px;height:fit-content;white-space:nowrap">${a.priority.toUpperCase()}</span>
           </div>
-        `).join('') : '<div style="color:#4b5563;font-size:13px">No pending actions</div>'}
+        `).join('') : '<div style="color:#4b5563;font-size:13px">Gözləyən əməliyyat yoxdur</div>'}
       </div>
     </div>
   `);
@@ -561,25 +561,25 @@ function vitalBox(icon, value, unit, label, status = '') {
 function renderDetailVitals(p) {
   html(el('tab-content'), `
     <div class="chart-wrap">
-      <div class="chart-wrap-title">Heart Rate (bpm)</div>
+      <div class="chart-wrap-title">Ürək Döyüntüsü (dəfə/dəq)</div>
       <div class="chart-canvas-wrap"><canvas id="c-hr"></canvas></div>
     </div>
     <div class="chart-wrap">
-      <div class="chart-wrap-title">Blood Pressure (mmHg)</div>
+      <div class="chart-wrap-title">Qan Təzyiqi (mmHg)</div>
       <div class="chart-canvas-wrap"><canvas id="c-bp"></canvas></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="chart-wrap">
-        <div class="chart-wrap-title">SpO2 (%)</div>
+        <div class="chart-wrap-title">Oksigen Satürasyonu (%)</div>
         <div class="chart-canvas-wrap"><canvas id="c-spo2"></canvas></div>
       </div>
       <div class="chart-wrap">
-        <div class="chart-wrap-title">Temperature (°C)</div>
+        <div class="chart-wrap-title">Temperatur (°C)</div>
         <div class="chart-canvas-wrap"><canvas id="c-temp"></canvas></div>
       </div>
     </div>
     <div class="chart-wrap">
-      <div class="chart-wrap-title">Respiratory Rate (/min)</div>
+      <div class="chart-wrap-title">Tənəffüs Tezliyi (/dəq)</div>
       <div class="chart-canvas-wrap"><canvas id="c-rr"></canvas></div>
     </div>
   `);
@@ -599,7 +599,7 @@ function renderDetailLabs(p) {
     <div class="card">
       <table class="data-table">
         <thead>
-          <tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference</th><th>Status</th><th>Time</th></tr>
+          <tr><th>Test</th><th>Nəticə</th><th>Vahid</th><th>Referens</th><th>Status</th><th>Vaxt</th></tr>
         </thead>
         <tbody>
           ${labs.map(l => `
@@ -623,7 +623,7 @@ function renderDetailMeds(p) {
   html(el('tab-content'), `
     <div class="card">
       <table class="data-table">
-        <thead><tr><th>Drug</th><th>Dose</th><th>Route</th><th>Frequency</th><th>Prescribed By</th></tr></thead>
+        <thead><tr><th>Dərman</th><th>Doza</th><th>Yol</th><th>Tezlik</th><th>Təyin edən</th></tr></thead>
         <tbody>
           ${meds.map(m => `
             <tr>
@@ -639,7 +639,7 @@ function renderDetailMeds(p) {
     </div>
     ${p.allergies?.length ? `
       <div style="margin-top:12px;padding:12px 16px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px">
-        <div style="font-size:12px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⚠ Allergies</div>
+        <div style="font-size:12px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⚠ Allergilər</div>
         ${p.allergies.map(a => `<div style="font-size:13px;color:#f9fafb">${escHtml(a.allergen)} <span style="color:#6b7280">— ${escHtml(a.reaction)} (${escHtml(a.severity)})</span></div>`).join('')}
       </div>
     ` : ''}
@@ -669,7 +669,7 @@ function renderDetailNotes(p) {
   const notes = p.notes || [];
   html(el('tab-content'), `
     <div style="margin-bottom:16px">
-      <button class="btn btn-primary btn-sm" id="add-note-btn">+ Add Note</button>
+      <button class="btn btn-primary btn-sm" id="add-note-btn">+ Qeyd Əlavə Et</button>
     </div>
     ${notes.map(n => `
       <div class="note-card">
@@ -684,21 +684,21 @@ function renderDetailNotes(p) {
   `);
 
   el('add-note-btn').onclick = () => {
-    showModal('Add Clinical Note',
+    showModal('Klinik Qeyd Əlavə Et',
       `<div>
         <div style="margin-bottom:8px">
-          <label style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.3px">Note Type</label>
+          <label style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.3px">Qeyd Tipi</label>
           <select class="form-select" id="note-type-sel" style="width:100%;margin-top:4px">
-            <option>Ward Round</option><option>Progress Note</option><option>Procedure</option><option>Referral</option><option>Nursing</option>
+            <option>Bölmə Viziti</option><option>İrəliləmə Qeydi</option><option>Prosedura</option><option>Yönləndirmə</option><option>Sestrə</option>
           </select>
         </div>
         <div>
-          <label style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.3px">Note</label>
-          <textarea class="form-input" id="note-text" style="width:100%;min-height:120px;margin-top:4px;resize:vertical" placeholder="Enter clinical note..."></textarea>
+          <label style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.3px">Qeyd</label>
+          <textarea class="form-input" id="note-text" style="width:100%;min-height:120px;margin-top:4px;resize:vertical" placeholder="Klinik qeyd daxil edin..."></textarea>
         </div>
       </div>`,
       [{
-        label: 'Save Note',
+        label: 'Qeydi Saxla',
         cls: 'btn-primary',
         action: () => {
           const type = document.getElementById('note-type-sel')?.value || 'Note';
@@ -710,7 +710,7 @@ function renderDetailNotes(p) {
             type,
             content,
           });
-          Toast.show('Note saved', 'success');
+          Toast.show('Qeyd saxlanıldı', 'success');
           renderDetailNotes(p);
         },
       }]
@@ -734,13 +734,13 @@ function renderDetailInsights(p) {
           <span class="confidence-label">${ins.confidence}%</span>
         </div>
       </div>
-    `).join('') : '<div style="color:#4b5563;font-size:13px">No AI insights available.</div>'}
+    `).join('') : '<div style="color:#4b5563;font-size:13px">AI təhlili mövcud deyil.</div>'}
 
     <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,.06);padding-top:16px">
-      <div style="font-size:13px;font-weight:600;color:#f9fafb;margin-bottom:10px">Ask AXIOM about this patient</div>
+      <div style="font-size:13px;font-weight:600;color:#f9fafb;margin-bottom:10px">AXIOM-a bu xəstə haqqında soruş</div>
       <div style="display:flex;gap:8px">
-        <textarea class="form-input" id="insight-query" style="flex:1;min-height:60px;resize:none" placeholder="e.g. What's the most likely cause of rising lactate?"></textarea>
-        <button class="btn btn-primary" id="insight-ask-btn" style="align-self:flex-end">Ask</button>
+        <textarea class="form-input" id="insight-query" style="flex:1;min-height:60px;resize:none" placeholder="Məs. Artan laktanın ən ehtimal səbəbi nədir?"></textarea>
+        <button class="btn btn-primary" id="insight-ask-btn" style="align-self:flex-end">Soruş</button>
       </div>
       <div id="insight-response" style="margin-top:12px"></div>
     </div>
@@ -750,7 +750,7 @@ function renderDetailInsights(p) {
     const q = el('insight-query').value.trim();
     if (!q) return;
     const resp = el('insight-response');
-    resp.innerHTML = `<div style="display:flex;align-items:center;gap:8px;color:#6b7280"><div class="spinner"></div> AXIOM is thinking...</div>`;
+    resp.innerHTML = `<div style="display:flex;align-items:center;gap:8px;color:#6b7280"><div class="spinner"></div> AXIOM fikirləşir...</div>`;
     const patientCtx = {
       name: p.name, age: p.age, diagnosis: p.diagnosis,
       vitals: p.vitals.current, labs: p.labs, news2: p.news2Score,
@@ -759,9 +759,9 @@ function renderDetailInsights(p) {
     if (result.ok) {
       resp.innerHTML = `<div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-radius:10px;padding:14px;font-size:13.5px;color:#d1d5db;line-height:1.7;white-space:pre-wrap">${escHtml(result.data.response)}</div>`;
     } else {
-      const errMsg = result.error === 'RATE_LIMIT_EXCEEDED' ? 'Rate limit exceeded. Please try again later.' :
-                     result.error === 'AUTHENTICATION_FAILED' ? 'Authentication failed. Please refresh.' :
-                     result.error || 'Error querying AXIOM';
+      const errMsg = result.error === 'RATE_LIMIT_EXCEEDED' ? 'Limit aşılmışdır. Sonra yenidən cəhd edin.' :
+                     result.error === 'AUTHENTICATION_FAILED' ? 'Autentifikasiya uğursuz oldu. Yenilə.' :
+                     result.error || 'AXIOM sorğusunda xəta';
       resp.innerHTML = `<div style="color:#ef4444;font-size:13px">⚠ ${escHtml(errMsg)}</div>`;
       Toast.show(errMsg, 'warning', 5000);
     }
@@ -881,8 +881,8 @@ function renderScribe() {
         <div id="note-output" class="note-output" style="min-height:300px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5">
           <div style="color:#4b5563;font-size:13px;text-align:center;padding:60px 20px">
             <div style="font-size:32px;margin-bottom:8px">📄</div>
-            <div>Generated SOAP note will appear here</div>
-            <div style="font-size:11px;color:#6b7280;margin-top:8px">Record your consultation or paste a transcript, then click "Generate SOAP Note"</div>
+            <div>Yaradılan SOAP qeydi burada görünəcək</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:8px">Məsləhətinizi qeyd edin və ya transkriptsiyonu yapışdırın, sonra "SOAP Qeydi Yaradın" düyməsinə tıklayın</div>
           </div>
         </div>
       </div>
@@ -916,11 +916,11 @@ function renderScribe() {
     const rec = new SpeechRecognition();
     rec.continuous = true;
     rec.interimResults = true;
-    rec.language = 'en-US';
+    rec.language = 'az-AZ';
 
     rec.onstart = () => {
-      status.textContent = '🎙️ Listening... Speak clearly';
-      Toast.show('🎙️ Microphone ACTIVE - Speak your clinical consultation', 'success', 2000);
+      status.textContent = '🎙️ Dinləyir... Aydın danışın';
+      Toast.show('🎙️ Mikrofon AKTIV - Klinik məsləhətinizi danışın', 'success', 2000);
     };
 
     rec.onresult = (event) => {
@@ -950,18 +950,18 @@ function renderScribe() {
     };
 
     rec.onerror = (event) => {
-      console.log('Speech recognition error:', event.error);
+      console.log('Səs tanıması xətası:', event.error);
 
       if (event.error === 'network') {
-        Toast.show('⚠️ Network error - Continue speaking, will retry automatically', 'warning', 2000);
+        Toast.show('⚠️ Şəbəkə xətası - Danışmağa davam edin, avtomatik yenidən cəhd olunacaq', 'warning', 2000);
       } else if (event.error === 'not-allowed') {
-        Toast.show('❌ Microphone permission denied - Paste transcript manually', 'critical', 3000);
+        Toast.show('❌ Mikrofon icazəsi verilmədi - Transkripsiyonu əl ilə yapışdırın', 'critical', 3000);
         recording = false;
         recBtn.classList.remove('recording');
       } else if (event.error !== 'no-speech' && event.error !== 'audio-capture') {
         // Ignore no-speech and audio-capture errors
         if (recording && event.error !== 'aborted') {
-          Toast.show(`⚠️ ${event.error} - Continue speaking...`, 'info', 1000);
+          Toast.show(`⚠️ ${event.error} - Danışmağa davam edin...`, 'info', 1000);
         }
       }
     };
@@ -972,7 +972,7 @@ function renderScribe() {
         try {
           rec.start();
         } catch (e) {
-          console.log('Could not restart recognition:', e);
+          console.log('Tanıması yenidən başlamadım:', e);
         }
       }
     };
@@ -996,7 +996,7 @@ function renderScribe() {
         }
       }
 
-      status.textContent = '✓ Recording complete';
+      status.textContent = '✓ Qeydiyyat tamamlandı';
       Toast.show('✅ Recording stopped. Review and generate SOAP note.', 'success');
     } else {
       // Start recording
@@ -1150,17 +1150,17 @@ function renderAssistant() {
         <div class="chat-ai-avatar">A</div>
         <div>
           <div class="chat-ai-name">AXIOM</div>
-          <div class="chat-ai-meta">Clinical AI Intelligence Engine · AZEDOC v1.0</div>
+          <div class="chat-ai-meta">Klinik AI Zəka Mühərriki · AZEDOC v1.0</div>
         </div>
         <div class="chat-model-badge">claude-opus-4-6</div>
       </div>
       <div class="chat-context-bar">
-        <span class="chat-context-label">Patient context:</span>
+        <span class="chat-context-label">Xəstə konteksti:</span>
         <select class="chat-context-select" id="chat-patient-sel">
-          <option value="">No patient selected (general mode)</option>
+          <option value="">Xəstə seçilmədi (ümumi rejim)</option>
           ${patients.map(p => `<option value="${p.id}">${escHtml(p.name)} (${p.bed})</option>`).join('')}
         </select>
-        <button class="btn btn-ghost btn-sm" id="clear-chat-btn" style="margin-left:auto">Clear</button>
+        <button class="btn btn-ghost btn-sm" id="clear-chat-btn" style="margin-left:auto">Təmizlə</button>
       </div>
       <div class="chat-messages" id="chat-messages">
         ${ChatState.messages.length === 0 ? welcomeMessage() : ChatState.messages.map(m => msgHtml(m)).join('')}
@@ -1300,8 +1300,8 @@ function renderHandover() {
     <div class="handover-layout">
       <div class="handover-panel">
         <div class="handover-panel-head">
-          <div style="font-size:13px;font-weight:700;color:#f9fafb">Patient List (${patients.length})</div>
-          <div style="font-size:12px;color:#6b7280;margin-top:2px">Add notes for handover</div>
+          <div style="font-size:13px;font-weight:700;color:#f9fafb">Xəstə Siyahısı (${patients.length})</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">Dəyişdirmə üçün qeydlər əlavə edin</div>
         </div>
         <div class="handover-panel-body" id="handover-patients"></div>
       </div>
@@ -1309,26 +1309,26 @@ function renderHandover() {
       <div class="handover-panel">
         <div class="handover-panel-head" style="display:flex;align-items:center;gap:10px">
           <div class="ai-badge"><span class="ai-badge-dot"></span>AXIOM</div>
-          <div style="font-size:13px;font-weight:700;color:#f9fafb">AI Handover Summary</div>
-          <button class="btn btn-primary btn-sm" id="gen-handover-btn" style="margin-left:auto">Generate</button>
+          <div style="font-size:13px;font-weight:700;color:#f9fafb">AI Dəyişdirmə Xülasəsi</div>
+          <button class="btn btn-primary btn-sm" id="gen-handover-btn" style="margin-left:auto">Yaradın</button>
         </div>
         <div class="handover-panel-body">
           <div style="display:flex;gap:12px;margin-bottom:16px">
             <div style="flex:1">
-              <div class="form-label">Handover to</div>
+              <div class="form-label">Kimin üzərinə dəyişdirmə</div>
               <input class="form-input" id="handover-doctor" value="Gecə Komandası" style="margin-top:4px">
             </div>
             <div>
-              <div class="form-label">Shift end</div>
+              <div class="form-label">Smena sonu</div>
               <input class="form-input" id="handover-time" value="19:00" style="margin-top:4px;width:90px">
             </div>
           </div>
           <div id="handover-summary" class="handover-summary">
-            <div style="color:#4b5563;text-align:center;padding:40px 0">Click "Generate" to create AI handover summary</div>
+            <div style="color:#4b5563;text-align:center;padding:40px 0">AI dəyişdirmə xülasəsi yaratmaq üçün "Yaradın" düyməsinə tıklayın</div>
           </div>
           <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="btn btn-secondary btn-sm" id="copy-handover-btn">${ICONS.copy} Copy</button>
-            <button class="btn btn-secondary btn-sm" id="print-handover-btn">${ICONS.print} Print</button>
+            <button class="btn btn-secondary btn-sm" id="copy-handover-btn">${ICONS.copy} Kopyala</button>
+            <button class="btn btn-secondary btn-sm" id="print-handover-btn">${ICONS.print} Çap Et</button>
           </div>
         </div>
       </div>
@@ -1344,7 +1344,7 @@ function renderHandover() {
           <span class="handover-patient-name">${escHtml(p.name)}</span>
           <span class="news2-badge ${news2Class(p.news2Score)}" style="font-size:10px">N2:${p.news2Score}</span>
         </div>
-        <div class="handover-patient-meta">Bed ${p.bed} · ${escHtml(p.diagnosis)}</div>
+        <div class="handover-patient-meta">Çarpayı ${p.bed} · ${escHtml(p.diagnosis)}</div>
         <textarea class="handover-notes-input" data-pid="${p.id}" placeholder="Dəyişdirmə qeydləri əlavə edin...">${escHtml(p.handoverNotes || '')}</textarea>
       </div>
     </div>
@@ -1355,7 +1355,7 @@ function renderHandover() {
   });
 
   el('gen-handover-btn').onclick = async () => {
-    const doctorName = el('handover-doctor').value || 'Night Team';
+    const doctorName = el('handover-doctor').value || 'Gecə Komandası';
     const shiftEnd = el('handover-time').value || '19:00';
     const summaryEl = el('handover-summary');
 
@@ -1407,8 +1407,8 @@ function renderAnalytics() {
 
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">Ward Analytics</div>
-      <div class="page-subtitle">Shift intelligence and pattern analysis</div>
+      <div class="page-title">Bölmə Analitikası</div>
+      <div class="page-subtitle">Smena intellekti və nümunə analizi</div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
@@ -1420,27 +1420,27 @@ function renderAnalytics() {
 
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px">
       <div class="card card-pad">
-        <div class="chart-wrap-title">NEWS2 Distribution</div>
+        <div class="chart-wrap-title">NEWS2 Paylanması</div>
         <div style="position:relative;height:220px"><canvas id="analytics-news2"></canvas></div>
       </div>
       <div class="card card-pad">
-        <div class="chart-wrap-title">Risk Distribution</div>
+        <div class="chart-wrap-title">Risk Paylanması</div>
         <div style="position:relative;height:220px"><canvas id="analytics-risk"></canvas></div>
       </div>
     </div>
 
     <div class="section-header">
       <div class="ai-badge"><span class="ai-badge-dot"></span>AXIOM</div>
-      <span class="section-title" style="margin-left:4px">Pattern Insights</span>
+      <span class="section-title" style="margin-left:4px">Nümunə Təhliləri</span>
       <span class="section-count">${insights.length}</span>
       <div class="section-line"></div>
     </div>
     <div class="analytics-grid">
       ${insights.map(ins => `
         <div class="insight-card" data-pid="${ins.patientId}" style="cursor:pointer">
-          <div style="font-size:11px;color:#6b7280;margin-bottom:6px">Patient: <strong style="color:#9ca3af">${escHtml(ins.patient)}</strong></div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:6px">Xəstə: <strong style="color:#9ca3af">${escHtml(ins.patient)}</strong></div>
           <div class="insight-title" style="font-size:13px">${escHtml(ins.insight)}</div>
-          <div class="insight-source">Based on: ${escHtml(ins.based_on)}</div>
+          <div class="insight-source">Əsasında: ${escHtml(ins.based_on)}</div>
           <div class="confidence-bar-wrap" style="margin-top:8px">
             <div class="confidence-bar"><div class="confidence-fill" style="width:${ins.confidence}%"></div></div>
             <span class="confidence-label">${ins.confidence}%</span>
@@ -1562,7 +1562,7 @@ const App = {
       // Initialize API connection first
       const apiReady = await API.init();
       if (!apiReady) {
-        Toast.show('Warning: API connection failed. Running in demo mode.', 'warning', 5000);
+        Toast.show('Xəbərdarlıq: API bağlantısı uğursuz oldu. Demo rejimində işləyir.', 'warning', 5000);
       }
 
       buildSidebar();
