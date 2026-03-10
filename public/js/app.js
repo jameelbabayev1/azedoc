@@ -847,31 +847,115 @@ function renderScribe() {
   const status = el('record-status');
   const timer = el('record-timer');
 
-  // Voice Recording with Web Speech API
+  // Voice Recording with Web Speech API - ENHANCED
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
+  let finalTranscript = '';
+  let transcriptionSupported = !!SpeechRecognition;
 
-  recBtn.onclick = () => {
+  function initializeRecognition() {
+    if (!SpeechRecognition) return null;
+
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.language = 'en-US';
+
+    rec.onstart = () => {
+      status.textContent = '🎙️ Listening... Speak clearly';
+      Toast.show('🎙️ Microphone ACTIVE - Speak your clinical consultation', 'success', 2000);
+    };
+
+    rec.onresult = (event) => {
+      let interimTranscript = '';
+
+      // Process all results
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript.trim();
+
+        if (event.results[i].isFinal) {
+          // Final result - add to transcript
+          if (transcript) {
+            finalTranscript += transcript + ' ';
+          }
+        } else {
+          // Interim result - show live
+          interimTranscript += transcript;
+        }
+      }
+
+      // Update display with final + interim
+      const displayText = (finalTranscript + interimTranscript).trim();
+      el('transcript-area').textContent = displayText;
+
+      // Auto-scroll to bottom
+      el('transcript-area').scrollTop = el('transcript-area').scrollHeight;
+    };
+
+    rec.onerror = (event) => {
+      console.log('Speech recognition error:', event.error);
+
+      if (event.error === 'network') {
+        Toast.show('⚠️ Network error - Continue speaking, will retry automatically', 'warning', 2000);
+      } else if (event.error === 'not-allowed') {
+        Toast.show('❌ Microphone permission denied - Paste transcript manually', 'critical', 3000);
+        recording = false;
+        recBtn.classList.remove('recording');
+      } else if (event.error !== 'no-speech' && event.error !== 'audio-capture') {
+        // Ignore no-speech and audio-capture errors
+        if (recording && event.error !== 'aborted') {
+          Toast.show(`⚠️ ${event.error} - Continue speaking...`, 'info', 1000);
+        }
+      }
+    };
+
+    rec.onend = () => {
+      // Auto-restart if still recording
+      if (recording && rec) {
+        try {
+          rec.start();
+        } catch (e) {
+          console.log('Could not restart recognition:', e);
+        }
+      }
+    };
+
+    return rec;
+  }
+
+  recBtn.onclick = async () => {
     if (recording) {
+      // Stop recording
       recording = false;
       clearInterval(recInterval);
       recBtn.classList.remove('recording');
-      status.textContent = '✓ Recording completed';
       timer.classList.remove('active');
 
-      // Stop speech recognition
       if (recognition) {
-        recognition.stop();
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.log('Error stopping recognition:', e);
+        }
       }
 
-      Toast.show('✓ Recording complete. Review transcript and generate SOAP note.', 'success');
+      status.textContent = '✓ Recording complete';
+      Toast.show('✅ Recording stopped. Review and generate SOAP note.', 'success');
     } else {
       // Start recording
+      if (!transcriptionSupported) {
+        Toast.show('💡 Voice transcription not supported in your browser. Paste transcript manually.', 'info');
+        return;
+      }
+
       recording = true;
+      finalTranscript = '';  // Reset transcript
       recBtn.classList.add('recording');
-      status.textContent = '🎙️ Recording... (Listening)';
+      status.textContent = '🎙️ Recording...';
       timer.classList.add('active');
       recSeconds = 0;
+
+      // Start timer
       recInterval = setInterval(() => {
         recSeconds++;
         const m = Math.floor(recSeconds / 60);
@@ -879,54 +963,21 @@ function renderScribe() {
         timer.textContent = `${m}:${s.toString().padStart(2, '0')}`;
       }, 1000);
 
-      // Start Web Speech API transcription if available
-      if (SpeechRecognition) {
-        try {
-          recognition = new SpeechRecognition();
-          let finalTranscript = '';
-
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.language = 'en-US';
-
-          recognition.onstart = () => {
-            Toast.show('🎙️ Microphone active - Speak your clinical notes clearly', 'success', 2000);
-          };
-
-          recognition.onresult = (event) => {
-            let interimTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              const transcriptSegment = event.results[i][0].transcript;
-              if (event.results[i].isFinal) {
-                finalTranscript += transcriptSegment + ' ';
-              } else {
-                interimTranscript += transcriptSegment;
-              }
-            }
-            el('transcript-area').textContent = (finalTranscript + interimTranscript).trim();
-          };
-
-          recognition.onerror = (event) => {
-            console.log('Speech recognition error:', event.error);
-            if (event.error === 'network') {
-              Toast.show('⚠️ Network issue. Paste transcript manually.', 'warning');
-            } else if (event.error !== 'no-speech') {
-              Toast.show(`Transcription paused (${event.error}). Continue speaking...`, 'warning', 2000);
-            }
-          };
-
-          recognition.onend = () => {
-            if (recording) {
-              recognition.start(); // Auto-restart if still recording
-            }
-          };
-
+      // Initialize and start speech recognition
+      try {
+        recognition = initializeRecognition();
+        if (recognition) {
           recognition.start();
-        } catch (e) {
-          Toast.show('💡 Microphone unavailable. Paste your transcript manually below.', 'info');
+        } else {
+          Toast.show('💡 Microphone unavailable. Paste transcript manually.', 'info');
+          recording = false;
+          recBtn.classList.remove('recording');
         }
-      } else {
-        Toast.show('💡 Browser does not support voice input. Paste transcript manually.', 'info');
+      } catch (e) {
+        console.error('Error starting recognition:', e);
+        Toast.show('❌ Could not access microphone. Paste transcript manually.', 'warning');
+        recording = false;
+        recBtn.classList.remove('recording');
       }
     }
   };
