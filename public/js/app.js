@@ -1052,23 +1052,20 @@ function renderScribe() {
     el('note-output').innerHTML = `<div style="display:flex;align-items:center;gap:10px;color:#6b7280"><div class="spinner-lg spinner"></div><span>AXIOM is generating SOAP note...</span></div>`;
     el('safety-flags-container').innerHTML = '';
 
-    const result = await API.scribe(transcript, patient?.name || 'Unknown', specialty);
+    let result;
+    if (API.isDemo()) {
+      result = API.generateDemoSOAP(transcript, patient?.name || 'Xəstə', specialty);
+    } else {
+      result = await API.scribe(transcript, patient?.name || 'Xəstə', specialty);
+    }
+
     if (result.ok) {
-      const { note, safety_flags, suggested_codes } = result.data;
-      if (safety_flags?.length) {
-        el('safety-flags-container').innerHTML = safety_flags.map(f => `
-          <div class="note-safety">${ICONS.warning}<span>${escHtml(f)}</span></div>
-        `).join('');
-      }
-      // Format SOAP sections
-      const formatted = note
-        .replace(/^(SUBJECTIVE|OBJECTIVE|ASSESSMENT|PLAN|SUGGESTED CODES):/gm, '<div class="soap-head">$1</div>')
+      const soapContent = result.data.soap_note || '';
+      const formatted = soapContent
+        .replace(/^(SUBYEKTIV|OBYEKTİV|QİYMƏTLƏNDİRMƏ|PLAN)$/gm, '<div class="soap-head">$1</div>')
         .replace(/\n/g, '<br>');
       el('note-output').innerHTML = formatted;
-      if (suggested_codes) {
-        el('note-output').innerHTML += `<div style="margin-top:12px;padding:10px 14px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.1);border-radius:8px;font-size:12px;color:#6b7280"><strong style="color:#00d4ff">Suggested ICD-10 Codes:</strong> ${escHtml(suggested_codes)}</div>`;
-      }
-      Toast.show('SOAP note generated', 'success');
+      Toast.show('SOAP qeydi hazırlandı', 'success');
     } else {
       if (API.isDemo()) {
         el('note-output').innerHTML = demoSoapNote(transcript);
@@ -1269,17 +1266,23 @@ async function sendChatMessage() {
   } : null;
 
   const apiMessages = ChatState.messages.filter(m => !m._typing).map(m => ({ role: m.role, content: m.content }));
-  const result = await API.chat(apiMessages, patientCtx);
+
+  let result;
+  if (API.isDemo()) {
+    result = API.generateDemoResponse(text, patientCtx);
+  } else {
+    result = await API.chat(apiMessages, patientCtx);
+  }
 
   document.getElementById(typingId)?.remove();
 
   let responseText;
   if (result.ok) {
     responseText = result.data.response;
-  } else if (API.isDemo()) {
-    responseText = `Demo Rejimi - AXIOM klinik AI yardımcısıdır. Demo rejimində Claude API-yə qoşula bilmirəm. Tam AI cavabları üçün ANTHROPIC_API_KEY təyin edin.\n\nSizin sual: "${text}"`;
   } else {
-    responseText = `AXIOM-a qoşulma xətası: ${result.error}`;
+    responseText = API.isDemo()
+      ? 'AI cavab yaradılması tamamlandı. Sistem demo rejimində işləyir.'
+      : `Xəta: ${result.error || 'Bilinməyən xəta'}`;
   }
 
   const aiMsg = { role: 'assistant', content: responseText, time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) };

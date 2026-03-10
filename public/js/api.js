@@ -136,6 +136,64 @@ const API = {
     tokenMgr.clear();
     this._status = 'unknown';
   },
+
+  async generateSOAP(transcript, patientName, specialty) {
+    if (this.isDemo()) {
+      return this.generateDemoSOAP(transcript, patientName, specialty);
+    }
+    return this.scribe(transcript, patientName, specialty);
+  },
+
+  generateDemoSOAP(transcript, patientName, specialty) {
+    const soapNote = `Xəstə: ${patientName}
+Ixtisas: ${specialty}
+Vaxt: ${new Date().toLocaleTimeString('az-AZ')}
+
+SUBYEKTIV
+Xəstə diş ağrısından şikayət edir. Transkriptsiyaya əsasən:
+${transcript.substring(0, 200)}...
+
+OBYEKTİV
+Fiziki müayinə aparılmışdır. Cərəyan tərəfindən vital əlamətlər:
+- Qan təzyiqi: Normal
+- Ürək döyüntüsü: Normal
+- Temperatur: Normal
+
+QİYMƏTLƏNDİRMƏ
+Klinik baxış diaqnoza uyğun. Əlavə araşdırma mümkün.
+
+PLAN
+1. Simptomatik müalicə
+2. Izlənmə təmin ediləcəkdir
+3. Gərəkçə mütəxəssisə yönləndirmə`;
+
+    return {
+      ok: true,
+      data: {
+        soap_note: soapNote,
+        generated_at: new Date().toISOString()
+      }
+    };
+  },
+
+  generateDemoResponse(query, patientContext) {
+    const responses = [
+      'Bu xəstənin vəziyyəti diqqət tələb edir. Vital əlamətləri izləyin.',
+      'Laboratoriya nəticələrinə əsasən, daha ətraflı araşdırma tələb olunur.',
+      'Kliniki baxışa əsasən müalicə plani hazırlanmışdır.',
+      'Xəstənin izlənməsi davam edilməlidir. Parametrləri qeyd edin.',
+      'Bu simptomlar üçün diferensial diaqnoz düşünülsün.'
+    ];
+    const response = responses[Math.floor(Math.random() * responses.length)];
+    return {
+      ok: true,
+      data: {
+        response: response,
+        model: 'demo-mode',
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
 };
 
 global.API = API;
