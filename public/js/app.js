@@ -244,7 +244,7 @@ function renderDashboard() {
             <div class="shift-progress-bar">
               <div class="shift-progress-fill" id="shift-fill" style="width:${progress}%"></div>
             </div>
-            <span class="shift-progress-label">${progress}% through shift</span>
+            <span class="shift-progress-label">${progress}% sməna keçən</span>
           </div>
         </div>
         <div id="api-status-badge"></div>
@@ -252,40 +252,40 @@ function renderDashboard() {
       <div class="hero-stats">
         <div class="hero-stat accent-stat">
           <div class="hero-stat-val">${stats.total}</div>
-          <div class="hero-stat-lbl">Total Patients</div>
+          <div class="hero-stat-lbl">Cəmi Xəstələr</div>
         </div>
         <div class="hero-stat critical-stat">
           <div class="hero-stat-val">${stats.critical + stats.high}</div>
-          <div class="hero-stat-lbl">High Risk</div>
+          <div class="hero-stat-lbl">Yüksək Risk</div>
         </div>
         <div class="hero-stat warn-stat">
           <div class="hero-stat-val">${stats.pendingActions}</div>
-          <div class="hero-stat-lbl">Pending Actions</div>
+          <div class="hero-stat-lbl">Gözləyən Əməliyyatlar</div>
         </div>
         <div class="hero-stat stable-stat">
           <div class="hero-stat-val">${stats.stable}</div>
-          <div class="hero-stat-lbl">Stable</div>
+          <div class="hero-stat-lbl">Stabil</div>
         </div>
       </div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
       <div class="card card-pad">
-        <div class="chart-wrap-title">Risk Distribution</div>
+        <div class="chart-wrap-title">Risk Paylanması</div>
         <div style="position:relative;height:200px"><canvas id="ward-risk-chart"></canvas></div>
       </div>
       <div class="card card-pad">
-        <div class="chart-wrap-title">NEWS2 Score Distribution</div>
+        <div class="chart-wrap-title">NEWS2 Skoru Paylanması</div>
         <div style="position:relative;height:200px"><canvas id="news2-bar-chart"></canvas></div>
       </div>
     </div>
 
     ${criticalHigh.length ? `
     <div class="section-header">
-      <span class="section-title critical">${ICONS.warning} Priority Patients</span>
+      <span class="section-title critical">${ICONS.warning} Önəmli Xəstələr</span>
       <span class="section-count">${criticalHigh.length}</span>
       <div class="section-line"></div>
-      <button class="btn btn-ghost btn-sm" onclick="Router.go('patients')">View all</button>
+      <button class="btn btn-ghost btn-sm" onclick="Router.go('patients')">Hamısını Gör</button>
     </div>
     <div class="patients-grid" style="margin-bottom:20px">
       ${criticalHigh.map(p => patientCardHtml(p)).join('')}
@@ -294,7 +294,7 @@ function renderDashboard() {
 
     ${stable.length ? `
     <div class="section-header">
-      <span class="section-title stable">Stable Patients</span>
+      <span class="section-title stable">Stabil Xəstələr</span>
       <span class="section-count">${stable.length}</span>
       <div class="section-line"></div>
     </div>
@@ -321,9 +321,9 @@ function renderDashboard() {
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 12) return 'morning';
-  if (h < 17) return 'afternoon';
-  return 'evening';
+  if (h < 12) return 'Sabah';
+  if (h < 17) return 'Günortası';
+  return 'Axşam';
 }
 
 function updateApiStatusBadge() {
@@ -333,7 +333,7 @@ function updateApiStatusBadge() {
   badge.innerHTML = `
     <div class="ai-badge">
       <span class="ai-badge-dot"></span>
-      ${isDemo ? 'Demo Mode — No API Key' : 'AXIOM AI Connected'}
+      ${isDemo ? 'Demo Rejimi — API Açarı Yoxdur' : 'AXIOM AI Bağlandı'}
     </div>
   `;
 }
@@ -379,8 +379,8 @@ function patientCardHtml(p) {
         </div>
       </div>
       <div class="patient-card-footer">
-        <span class="last-seen">Seen ${timeAgo(p.lastSeen)}</span>
-        ${pending ? `<span class="pending-badge">${ICONS.warning} ${pending} pending</span>` : ''}
+        <span class="last-seen">${timeAgo(p.lastSeen)} əvvəl görüldü</span>
+        ${pending ? `<span class="pending-badge">${ICONS.warning} ${pending} gözləyən</span>` : ''}
         <span class="risk-badge ${p.riskLevel}"><span class="risk-dot ${p.riskLevel === 'critical' ? 'pulse' : ''}"></span>${p.riskLevel}</span>
       </div>
     </div>
@@ -402,10 +402,10 @@ function renderPatients() {
       <div class="page-subtitle">${ShiftState.ward} · ${PatientStore.getAll().length} patients</div>
     </div>
     <div class="filter-bar" id="filter-bar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="critical">Critical</button>
-      <button class="filter-btn" data-filter="high">High Risk</button>
-      <button class="filter-btn" data-filter="stable">Stable</button>
+      <button class="filter-btn active" data-filter="all">Hamısı</button>
+      <button class="filter-btn" data-filter="critical">Kritik</button>
+      <button class="filter-btn" data-filter="high">Yüksək Risk</button>
+      <button class="filter-btn" data-filter="stable">Stabil</button>
     </div>
     <div class="patients-grid" id="patients-grid"></div>
   `);
@@ -532,7 +532,7 @@ function renderDetailOverview(p) {
         </div>
       </div>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#f9fafb;margin-bottom:10px">Pending Actions</div>
+        <div style="font-size:13px;font-weight:700;color:#f9fafb;margin-bottom:10px">Gözləyən Əməliyyatlar</div>
         ${pending.length ? pending.map(a => `
           <div style="display:flex;gap:10px;padding:10px 12px;background:${a.priority === 'urgent' ? 'rgba(239,68,68,.06)' : 'var(--bg-e)'};border:1px solid ${a.priority === 'urgent' ? 'rgba(239,68,68,.2)' : 'rgba(255,255,255,.06)'};border-radius:8px;margin-bottom:8px">
             <div style="flex:1">
@@ -787,25 +787,25 @@ function renderScribe() {
         <div class="scribe-panel-body" style="font-size:13px;color:#cbd5e0;line-height:1.6">
           <div style="padding:0;display:flex;flex-direction:column;gap:12px">
             <div style="padding:10px;background:rgba(0,212,255,.05);border-radius:8px;border-left:3px solid #00d4ff">
-              <strong style="color:#00d4ff">✓ Best Format for Clear Documentation:</strong><br>
-              Speak naturally but organized. Example:<br>
-              <span style="color:#94a3b8;font-style:italic">"Patient is 45-year-old male. Chief complaint is chest pain for 2 days. Started after exertion. Associated with shortness of breath. Vital signs: temp 37, HR 85, BP 130/80, O2 98%. Heart sounds normal. Lungs clear."</span>
+              <strong style="color:#00d4ff">✓ Təmiz Sənədləndirmə üçün Ən Yaxşı Format:</strong><br>
+              Təbii amma təşkil olunmuş şəkildə danışın. Nümunə:<br>
+              <span style="color:#94a3b8;font-style:italic">"Xəstə 45 yaşlı kişidir. Əsas şikayət 2 gündür davam edən göğüs ağrısıdır. Fəaliyyətdən sonra başlamışdır. Nəfəs almada çətinlik ilə əlaqəlidir. Vital göstəricilər: temp 37, HR 85, BP 130/80, O2 98%. Ürək səsləri normal. Ağciyərlər aydın."</span>
             </div>
 
             <div style="padding:10px;background:rgba(124,58,237,.05);border-radius:8px;border-left:3px solid #7c3aed">
-              <strong style="color:#7c3aed">⭐ Say These Key Elements:</strong>
+              <strong style="color:#7c3aed">⭐ Bu Əsas Elementləri Deyin:</strong>
               <ul style="margin:8px 0 0 0;padding-left:18px">
-                <li>Patient name/age and chief complaint</li>
-                <li>Vital signs (temperature, heart rate, BP, O2)</li>
-                <li>Exam findings (clear/abnormal)</li>
-                <li>What you think it is</li>
-                <li>What you'll do (tests, treatment)</li>
+                <li>Xəstənin adı/yaşı və əsas şikayəti</li>
+                <li>Vital göstəricilər (temperatur, ürək döyüntüsü, BP, O2)</li>
+                <li>Tərəfləndirmə bulğuları (normal/anomal)</li>
+                <li>Bunun nə olduğunu düşündüyünüz</li>
+                <li>Nə edəcəyiniz (testlər, müalicə)</li>
               </ul>
             </div>
 
             <div style="padding:10px;background:rgba(34,197,94,.05);border-radius:8px;border-left:3px solid #22c55e">
-              <strong style="color:#22c55e">✅ No Perfect Script Needed:</strong><br>
-              AXIOM handles incomplete data. Even short notes convert to professional documentation.
+              <strong style="color:#22c55e">✅ Mükəmməl Skript Lazım Deyil:</strong><br>
+              AXIOM natamam məlumatı idarə edir. Hətta qısa qeydlər peşəkar sənədləndirməyə çevrilir.
             </div>
           </div>
         </div>
@@ -815,26 +815,26 @@ function renderScribe() {
       <div class="scribe-panel">
         <div class="scribe-panel-header">
           <span style="font-size:16px">🎙️</span>
-          <span class="scribe-panel-title">Voice Recording & Transcription</span>
+          <span class="scribe-panel-title">Ses Qeydiyyatı & Transkriptsiya</span>
         </div>
         <div class="scribe-panel-body">
           <div class="form-row" style="justify-content:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
             <div>
-              <div class="form-label" style="font-size:11px">Patient</div>
+              <div class="form-label" style="font-size:11px">Xəstə</div>
               <select class="form-select" id="scribe-patient" style="min-width:150px;font-size:13px">
-                <option value="">Select patient</option>
+                <option value="">Xəstə seçin</option>
                 ${PatientStore.getAll().map(p => `<option value="${p.id}">${escHtml(p.name)} (Bed ${p.bed})</option>`).join('')}
               </select>
             </div>
             <div>
-              <div class="form-label" style="font-size:11px">Department</div>
+              <div class="form-label" style="font-size:11px">Şöbə</div>
               <select class="form-select" id="scribe-specialty" style="min-width:140px;font-size:13px">
-                <option>General Medicine</option>
-                <option>Cardiology</option>
-                <option>Respiratory</option>
-                <option>Gastroenterology</option>
-                <option>Neurology</option>
-                <option>Emergency</option>
+                <option>Daxili Xəstəliklər</option>
+                <option>Kardioloji</option>
+                <option>Respirator</option>
+                <option>Qastroeneteroloji</option>
+                <option>Nevroloji</option>
+                <option>Təcili Yardım</option>
               </select>
             </div>
           </div>
@@ -847,19 +847,19 @@ function renderScribe() {
             <div class="record-ripple" style="animation-delay:1s"></div>
           </div>
 
-          <div class="record-status" id="record-status" style="text-align:center;font-weight:600;color:#00d4ff;margin-bottom:8px">🔴 Click to start recording</div>
+          <div class="record-status" id="record-status" style="text-align:center;font-weight:600;color:#00d4ff;margin-bottom:8px">🔴 Qeydiyyatı başlamaq üçün tıklayın</div>
           <div class="record-timer" id="record-timer" style="text-align:center;font-size:28px;font-weight:700;color:#00d4ff;font-family:'JetBrains Mono',monospace;letter-spacing:2px">0:00</div>
 
           <!-- TRANSCRIPT INPUT -->
           <div style="margin-top:16px">
-            <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📝 Transcript (Auto-filled or paste)</div>
-            <div class="transcript-area" id="transcript-area" contenteditable="true" style="outline:none;min-height:100px;font-family:'JetBrains Mono',monospace;font-size:12px" data-placeholder="Transcript appears here. You can also paste text manually..."></div>
+            <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📝 Transkript (Avtomatik doldurulur və ya yapışdırın)</div>
+            <div class="transcript-area" id="transcript-area" contenteditable="true" style="outline:none;min-height:100px;font-family:'JetBrains Mono',monospace;font-size:12px" data-placeholder="Transkript burada görünür. Siz də sətri əllə yapışdıra bilərsiniz..."></div>
           </div>
 
           <!-- ACTION BUTTONS -->
           <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:12px">
             <button class="btn btn-primary" id="generate-note-btn" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);font-weight:700">⚡ SOAP Qeydi Yaradın</button>
-            <button class="btn btn-ghost" id="clear-scribe-btn">Clear</button>
+            <button class="btn btn-ghost" id="clear-scribe-btn">Təmizlə</button>
           </div>
         </div>
       </div>
@@ -871,9 +871,9 @@ function renderScribe() {
         <div class="ai-badge" style="background:linear-gradient(135deg,#00d4ff,#7c3aed);padding:6px 12px"><span class="ai-badge-dot"></span>AXIOM Note Generator</div>
         <span class="scribe-panel-title">Peşəkar SOAP Sənədləndirmə</span>
         <div style="margin-left:auto;display:flex;gap:6px">
-          <button class="btn-icon btn-sm" id="copy-note-btn" title="Copy to Clipboard">${ICONS.copy}</button>
-          <button class="btn-icon btn-sm" id="print-note-btn" title="Print">${ICONS.print}</button>
-          <button class="btn-icon btn-sm" id="download-note-btn" title="Download">${ICONS.download || '⬇'}</button>
+          <button class="btn-icon btn-sm" id="copy-note-btn" title="Buferə Kopyala">${ICONS.copy}</button>
+          <button class="btn-icon btn-sm" id="print-note-btn" title="Çap Et">${ICONS.print}</button>
+          <button class="btn-icon btn-sm" id="download-note-btn" title="Endir">${ICONS.download || '⬇'}</button>
         </div>
       </div>
       <div class="scribe-panel-body">
@@ -1169,7 +1169,7 @@ function renderAssistant() {
         ${suggestionsHtml()}
       </div>
       <div class="chat-input-area">
-        <textarea class="chat-input" id="chat-input" placeholder="Ask about drug interactions, clinical guidelines, patient management..." rows="1"></textarea>
+        <textarea class="chat-input" id="chat-input" placeholder="Dərman qarşılıqları, klinik təlimatlar, xəstə idarəsi haqqında soruşun..." rows="1"></textarea>
         <button class="btn btn-primary" id="chat-send">${ICONS.send}</button>
       </div>
     </div>
@@ -1316,7 +1316,7 @@ function renderHandover() {
           <div style="display:flex;gap:12px;margin-bottom:16px">
             <div style="flex:1">
               <div class="form-label">Handover to</div>
-              <input class="form-input" id="handover-doctor" value="Night Team" style="margin-top:4px">
+              <input class="form-input" id="handover-doctor" value="Gecə Komandası" style="margin-top:4px">
             </div>
             <div>
               <div class="form-label">Shift end</div>
@@ -1345,7 +1345,7 @@ function renderHandover() {
           <span class="news2-badge ${news2Class(p.news2Score)}" style="font-size:10px">N2:${p.news2Score}</span>
         </div>
         <div class="handover-patient-meta">Bed ${p.bed} · ${escHtml(p.diagnosis)}</div>
-        <textarea class="handover-notes-input" data-pid="${p.id}" placeholder="Add handover notes...">${escHtml(p.handoverNotes || '')}</textarea>
+        <textarea class="handover-notes-input" data-pid="${p.id}" placeholder="Dəyişdirmə qeydləri əlavə edin...">${escHtml(p.handoverNotes || '')}</textarea>
       </div>
     </div>
   `).join('');
@@ -1412,10 +1412,10 @@ function renderAnalytics() {
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-      ${statTile('Total Patients', stats.total, '#00d4ff')}
-      ${statTile('Critical/High', stats.critical + stats.high, '#ef4444')}
-      ${statTile('Pending Actions', stats.pendingActions, '#f59e0b')}
-      ${statTile('Discharging', stats.discharging, '#10b981')}
+      ${statTile('Cəmi Xəstələr', stats.total, '#00d4ff')}
+      ${statTile('Kritik/Yüksək', stats.critical + stats.high, '#ef4444')}
+      ${statTile('Gözləyən Əməl', stats.pendingActions, '#f59e0b')}
+      ${statTile('Təxrif Edilən', stats.discharging, '#10b981')}
     </div>
 
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px">
@@ -1476,22 +1476,22 @@ function statTile(label, value, color) {
 function renderSettings() {
   html(el('page-content'), `
     <div class="page-header">
-      <div class="page-title">Settings</div>
-      <div class="page-subtitle">AZEDOC Clinical AI Platform configuration</div>
+      <div class="page-title">Parametrlər</div>
+      <div class="page-subtitle">AZEDOC Klinik AI Platforması Konfiqurasiyası</div>
     </div>
     <div style="max-width:600px">
       <div class="card card-pad" style="margin-bottom:16px">
-        <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">API Connection</div>
+        <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">API Bağlantısı</div>
         <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-e);border-radius:10px">
-          <div class="ai-badge"><span class="ai-badge-dot" style="background:${API.isDemo() ? '#f59e0b' : '#10b981'}"></span>${API.isDemo() ? 'Demo Mode' : 'Connected'}</div>
+          <div class="ai-badge"><span class="ai-badge-dot" style="background:${API.isDemo() ? '#f59e0b' : '#10b981'}"></span>${API.isDemo() ? 'Demo Rejimi' : 'Bağlandı'}</div>
           <div style="flex:1">
-            <div style="font-size:13px;color:#f9fafb">${API.isDemo() ? 'No API key configured' : 'ANTHROPIC_API_KEY active'}</div>
-            <div style="font-size:11.5px;color:#6b7280;margin-top:2px">${API.isDemo() ? 'Set ANTHROPIC_API_KEY env var or add to config.json to enable AI features' : 'AI features enabled — Model: claude-opus-4-6'}</div>
+            <div style="font-size:13px;color:#f9fafb">${API.isDemo() ? 'API açarı quraşdırılmamışdır' : 'ANTHROPIC_API_KEY fəal'}</div>
+            <div style="font-size:11.5px;color:#6b7280;margin-top:2px">${API.isDemo() ? 'AI xüsusiyyətlərini aktivləşdirmək üçün ANTHROPIC_API_KEY mühit dəyişənini təyin edin' : 'AI xüsusiyyətləri fəal — Model: claude-opus-4-6'}</div>
           </div>
         </div>
       </div>
       <div class="card card-pad" style="margin-bottom:16px">
-        <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">Doctor Profile</div>
+        <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">Hekim Profili</div>
         ${Object.entries(ShiftState.doctor).map(([k, v]) => `
           <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
             <span style="font-size:12px;color:#6b7280;text-transform:capitalize">${k.replace('_', ' ')}</span>
@@ -1500,15 +1500,15 @@ function renderSettings() {
         `).join('')}
       </div>
       <div class="card card-pad">
-        <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">About AZEDOC</div>
+        <div style="font-size:14px;font-weight:700;color:#f9fafb;margin-bottom:16px">AZEDOC Haqqında</div>
         <div style="font-size:13px;color:#6b7280;line-height:1.7">
-          AZEDOC Clinical AI Platform v2.0 — Production Ready<br>
-          Powered by AXIOM (claude-haiku-4-5)<br>
-          For professional use by licensed clinicians only.<br>
-          AI outputs are advisory and require clinical judgment.<br>
+          AZEDOC Klinik AI Platforması v2.0 — İstifadəyə Hazır<br>
+          AXIOM (claude-haiku-4-5) ilə İşləyən<br>
+          Yalnız lisenziyalı həkimlər tərəfindən istifadə üçün nəzərdə tutulmuşdur.<br>
+          AI nəticələri məsləhət xarakterlidir və klinik mühakimə tələb edir.<br>
           <br>
-          <strong style="color:#9ca3af">Security:</strong> JWT authentication, encrypted audit logging, KVKK compliant<br>
-          <strong style="color:#9ca3af">Region:</strong> Turkey-optimized compliance
+          <strong style="color:#9ca3af">Təhlükəsizlik:</strong> JWT autentifikasiyası, şifrələnmiş audit qeydi, Azərbaycan Qanunu ilə uyğun<br>
+          <strong style="color:#9ca3af">Bölgə:</strong> Azərbaycan sağlamlıq sistemi üçün optimallaşdırılmış
         </div>
       </div>
     </div>

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#030712">
-  <meta name="description" content="AZEDOC — Professional Clinical AI Platform for Hospital Doctors">
-  <title>AZEDOC — Clinical AI</title>
+  <meta name="description" content="AZEDOC — Xəstəxana Həkimləri üçün Peşəkar Klinik AI Platforması">
+  <title>AZEDOC — Klinik AI</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,11 +35,11 @@
   <div class="loading-logo">
     <span class="ll-a">A</span><span class="ll-rest">ZEDOC</span>
   </div>
-  <div class="loading-tagline">Clinical AI Platform</div>
+  <div class="loading-tagline">Klinik AI Platforması</div>
   <div class="loading-bar-wrap">
     <div class="loading-bar" id="loading-bar"></div>
   </div>
-  <div class="loading-msg" id="loading-msg">Initializing...</div>
+  <div class="loading-msg" id="loading-msg">Başladılır...</div>
 </div>
 
 <!-- App Shell -->
@@ -58,10 +58,10 @@
         </div>
         <div class="logo-text">
           <span class="logo-name">AZEDOC</span>
-          <span class="logo-sub">Clinical AI</span>
+          <span class="logo-sub">Klinik AI</span>
         </div>
       </div>
-      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Yan Paneli Aç/Kapat">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -78,28 +78,28 @@
         <button class="btn-icon tb-hamburger" id="tb-hamburger">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3.5" width="14" height="1.5" rx=".75" fill="currentColor"/><rect x="1" y="7.25" width="14" height="1.5" rx=".75" fill="currentColor"/><rect x="1" y="11" width="14" height="1.5" rx=".75" fill="currentColor"/></svg>
         </button>
-        <div class="tb-ward" id="tb-ward">Ward 7 — General Medicine</div>
+        <div class="tb-ward" id="tb-ward">7-ci Bölmə — Daxili Xəstəliklər</div>
         <div class="tb-shift-badge">
           <span class="shift-live-dot"></span>
-          <span>Shift Active</span>
+          <span>Smena Fəal</span>
         </div>
       </div>
 
       <div class="tb-center">
         <div class="search-wrap">
           <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10L12.5 12.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          <input type="text" class="search-input" id="search-input" placeholder="Search patients, diagnoses, drugs...">
+          <input type="text" class="search-input" id="search-input" placeholder="Xəstələri, diaqnozları, dərmanları arayın...">
           <span class="search-kbd">⌘K</span>
         </div>
       </div>
 
       <div class="tb-right">
-        <button class="btn-icon tb-notif" id="tb-notif" title="Alerts">
+        <button class="btn-icon tb-notif" id="tb-notif" title="Xəbərdarlıqlar">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span class="notif-badge" id="notif-badge">3</span>
         </button>
         <div class="tb-time" id="tb-time">--:--</div>
-        <div class="doctor-avatar" id="doctor-avatar" title="Dr. Sarah Martinez">SM</div>
+        <div class="doctor-avatar" id="doctor-avatar" title="Dr. Həsən Hüseynov">HH</div>
       </div>
     </header>
 
@@ -153,12 +153,12 @@ window.ICONS = {
   const bar = document.getElementById('loading-bar');
   const msg = document.getElementById('loading-msg');
   const steps = [
-    [15, 'Loading patient registry...'],
-    [35, 'Initializing AI models...'],
-    [55, 'Connecting to ward systems...'],
-    [70, 'Calibrating NEWS2 engine...'],
-    [85, 'Preparing shift intelligence...'],
-    [100, 'AZEDOC ready'],
+    [15, 'Xəstə registri yüklənir...'],
+    [35, 'AI modelləri başladılır...'],
+    [55, 'Bölmə sistemlərinə bağlanılır...'],
+    [70, 'NEWS2 mühərriki ayarlanır...'],
+    [85, 'Smena intellekti hazırlanır...'],
+    [100, 'AZEDOC hazırdır'],
   ];
   let i = 0;
   const iv = setInterval(() => {

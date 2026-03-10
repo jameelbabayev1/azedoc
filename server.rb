@@ -313,9 +313,9 @@ CLINICAL_SYSTEM = <<~PROMPT.freeze
         • Həyat tarzı dəyişiklikləri
 
   V. TƏHLÜKƏSİZLİK ÖNLƏRİ VƏ XƏBƏRDARLIQLAR
-     [⚠️ XƏBƏRDARLIQ]: Orta dərəcə əhəmiyyətli hallar
-     [🚨 TƏCİLİ]: Həyat-mərg təhlükəsi daşıyan hallar
-     [💡 KLİNİK İPUCU]: Mühüm klinik göstəriş
+     [XƏBƏRDARLIQ]: Orta dərəcə əhəmiyyətli hallar
+     [TƏCİLİ]: Həyat-mərg təhlükəsi daşıyan hallar
+     [KLİNİK İPUCU]: Mühüm klinik göstəriş
 
   VI. MONITORINQ VƏ TAKIP
      • Takip müddəti və tezliyi
@@ -359,22 +359,22 @@ CLINICAL_SYSTEM = <<~PROMPT.freeze
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
   Xəstənin xüsusi vəziyyəti verilsə:
-  ✓ Yaş, cinsiyyət, peşə maruziyyətini nəzərə alın
-  ✓ Mövcud komorbidləri (diabet, hipertensiyon, böbrək xəstəliyi, vb.) nəzərə alın
-  ✓ Cari dərmanlarla qarşılıqlı təsir yoxlamasi aparın
-  ✓ Böbrək və qaraciyər funksiyası vəziyyətinə görə dozu uyğunlaşdırın
-  ✓ Keçmiş müalicələrə və cavablarına müraciət edin
-  ✓ Sosioekonomik faktorları (tedavi dəyəri vb.) nəzərə alın
+  • Yaş, cinsiyyət, peşə maruziyyətini nəzərə alın
+  • Mövcud komorbidləri (diabet, hipertensiyon, böbrək xəstəliyi, vb.) nəzərə alın
+  • Cari dərmanlarla qarşılıqlı təsir yoxlamasi aparın
+  • Böbrək və qaraciyər funksiyası vəziyyətinə görə dozu uyğunlaşdırın
+  • Keçmiş müalicələrə və cavablarına müraciət edin
+  • Sosioekonomik faktorları (tedavi dəyəri vb.) nəzərə alın
 
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
   AZƏRBAYCAN ŞƏXSI MƏLUMATLAR QANUNU (№ 998-IIIQ) UYĞUNLUĞU VƏ MƏLUMAT KORUNMASI
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-  ✓ Şəxsi Sağlık Məlumatlarının məxfiliyi qorunacaq
-  ✓ Məlumatlar Azərbaycanda saxlanılacaq (Qanunun məqalə 8)
-  ✓ Xəstə razılığı istiqamətində hərəkət ediləcək
-  ✓ Bütün qarşılıqlar audit jurnalına qeyd olunacaq
-  ✓ Medico-hüquqi məsuliyyət hekim üzərində qalır
+  • Şəxsi Sağlık Məlumatlarının məxfiliyi qorunacaq
+  • Məlumatlar Azərbaycanda saxlanılacaq (Qanunun məqalə 8)
+  • Xəstə razılığı istiqamətində hərəkət ediləcək
+  • Bütün qarşılıqlar audit jurnalına qeyd olunacaq
+  • Medico-hüquqi məsuliyyət hekim üzərində qalır
 
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
@@ -391,10 +391,10 @@ SCRIBE_SYSTEM = <<~PROMPT.freeze
   KRİTİK PRİNSİP: ÇEVIK YANAŞMA - QİSMİ MƏLUMAT QABULDURuLUR
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-  ✓ Çatışmayan məlumatlar: Mövcud məlumatlar ilə ən yaxşı şəkildə sənədləndirmə yapın
-  ✓ Qismən transkriptlər: Sağlanan mətn işlənilə və peşəkərləşdirilə bilər
-  ✓ Cəld qeydlər: SOAP formatına çevrilə biər, tam forma əldə edilir
-  ✓ Prioritet: Sənədləndirmə hekimin tətbiqimə yardımcı olmaz, qanunu uyğun olmaq kritikdir
+  • Çatışmayan məlumatlar: Mövcud məlumatlar ilə ən yaxşı şəkildə sənədləndirmə yapın
+  • Qismən transkriptlər: Sağlanan mətn işlənilə və peşəkərləşdirilə bilər
+  • Cəld qeydlər: SOAP formatına çevrilə biər, tam forma əldə edilir
+  • Prioritet: Sənədləndirmə hekimin tətbiqimə yardımcı olmaz, qanunu uyğun olmaq kritikdir
 
   BAŞLIQ SATIRI: XƏSTƏ: [Adı və ya "Tanımlanmamış"], Yaş: [X və ya "Bilinməmiş"], KLİNİK SAHƏ: [Bölüm], TARİH: [Bugün]
 
@@ -473,17 +473,17 @@ SCRIBE_SYSTEM = <<~PROMPT.freeze
 
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-  ⚠️ ÖNƏMLİ QEYD: HEKIM ÜÇÜN İPUÇLARI
+  ÖNƏMLİ QEYD: HEKIM ÜÇÜN İPUÇLARI
   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
   Bu sənədləndirmə tez hazırlanmışdır. Hekimin MÜTLƏQ KONTROLü VƏ DÜZƏLİŞ etməsi lazımdır:
-  ✓ Xəstə məlumatlarını (adı, yaşı, klinik sahə) yoxlayın
-  ✓ Çatışmayan əlamətləri əlavə edin
-  ✓ Ön tanını yenidən nəzərdən keçirin
-  ✓ Müalicə planını təsdiqlə sin və lazımdırsa dəyişdirin
-  ✓ Azərbaycan Şəxsi Məlumatlar Qanununa uyğunluğu doğrulayın (xəstə məxfiliyi)
+  • Xəstə məlumatlarını (adı, yaşı, klinik sahə) yoxlayın
+  • Çatışmayan əlamətləri əlavə edin
+  • Ön tanını yenidən nəzərdən keçirin
+  • Müalicə planını təsdiqlə sin və lazımdırsa dəyişdirin
+  • Azərbaycan Şəxsi Məlumatlar Qanununa uyğunluğu doğrulayın (xəstə məxfiliyi)
 
-  🎯 DAHA YAXŞI SƏNƏDLƏR ÜÇÜN HEKIM BUNLARI DESIN:
+  DAHA YAXŞI SƏNƏDLƏR ÜÇÜN HEKIM BUNLARI DESIN:
   - Xəstə adı və yaşı
   - "Müraciət səbəbi: [əlamətlər]"
   - Vital əlamətlər: "Hərərət 37, nəbz 80, QBA 120/80, SpO2 98"
@@ -492,7 +492,7 @@ SCRIBE_SYSTEM = <<~PROMPT.freeze
   - Tanı: "Bu xəstə ehtimal ki [xəstəlik] var"
   - Plan: "Aspirin başlayacağız, kontrol 1 həftə sonra"
 
-  SƏNƏDLƏR BU ŞƏKİLDƏ ÇOX DAHA PEŞƏKAR OLACAQDIR! ✓
+  SƏNƏDLƏR BU ŞƏKİLDƏ ÇOX DAHA PEŞƏKAR OLACAQDIR!
 
 PROMPT
 
@@ -524,8 +524,8 @@ HANDOVER_SYSTEM = <<~PROMPT.freeze
   - Hər hansı sosial/tərxis considerations
 
   **S — Təhlükəsizlik Narahatçılıqları**
-  - Hərəkətə həssas xəstələri işarələyin: [⚠️ TƏXTƏLİ BƏXİŞ]
-  - Dərhal təhlükəsizlik narahatçılıqlarını işarələyin: [🚨 KRİTİK XƏBƏRDARLIQ]
+  - Hərəkətə həssas xəstələri işarələyin: [TƏXTƏLİ BƏXİŞ]
+  - Dərhal təhlükəsizlik narahatçılıqlarını işarələyin: [KRİTİK XƏBƏRDARLIQ]
   - Alergilik sədləri, infeksiya nəzarəti tədbirləri
   - Dərman təhlükəsizliyi considerations
 
@@ -886,10 +886,10 @@ puts "  ────────────────────────
 puts "  Server:         http://localhost:#{PORT}"
 puts "  Model:          #{MODEL}"
 puts "  Region:         #{CONFIG[:region]}"
-puts "  API Key:        #{API_KEY ? '✓ Configured' : '✗ NOT SET'}"
-puts "  Auth:           ✓ JWT Enabled"
+puts "  API Key:        #{API_KEY ? 'Configured' : 'NOT SET'}"
+puts "  Auth:           JWT Enabled"
 puts "  Rate Limit:     #{CONFIG[:rate_limit_requests]} req/#{(CONFIG[:rate_limit_window]/1000).to_i}s"
-puts "  Audit Logging:  #{CONFIG[:enable_audit_logging] ? '✓ Enabled' : '✗ Disabled'}"
+puts "  Audit Logging:  #{CONFIG[:enable_audit_logging] ? 'Enabled' : 'Disabled'}"
 puts "  CORS Origins:   #{CONFIG[:allowed_origins].join(', ')}"
 puts "  ─────────────────────────────────────────────────────────"
 puts ""
